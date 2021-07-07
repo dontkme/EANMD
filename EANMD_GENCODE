@@ -192,7 +192,8 @@ print "Feature: $feature\n";
 
 
 
-while(defined (our $inrow=<ANNOT>)){    ### Get CDS/Coding gene transcripts id.
+while(defined (my $inrow=<ANNOT>)){    ### Get CDS/Coding gene transcripts id.
+    if ($inrow =~ m/^\#+/) {next;}
     @tmp=();
     @tmp = split (/\t/,$inrow);
 
@@ -226,9 +227,10 @@ while(defined(our $inrow = <ANNOT>)){
     @tmp=();
 
     if ($inrow =~ m/^\#+/) {next;}
-    if ($annotcount > 1 and $annotcount % 100000 == 0){
-        print "Deal with $annotcount annotations.\n";
-    }
+    # if ($annotcount > 1 and $annotcount % 100000 == 0){
+    # if ($annotcount > 1 and $annotcount % 100000 == 0 ){
+    #     print "Deal with $annotcount annotations.\n";
+    # }
     
             @tmp = split (/\t/,$inrow);
             
@@ -279,7 +281,12 @@ while(defined(our $inrow = <ANNOT>)){
             # our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos..$seqendpos:$plusminus";
             our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos-$seqendpos:$plusminus.$seqlen";
             $annotcount++;
+            
+            if ($annotcount > 1 and $annotcount % 100000 == 0 ){
+                print "Deal with $annotcount annotations.\n";  ###print counts. 2021-07-06
+            }
             # print "$key\n";
+
             $key2Chr{$key}=$seqchrid;
             $key2type{$key}=$annottype;
             $key2startpos{$key}=$seqstartpos;
@@ -838,7 +845,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                 }
                 $originexonCDSseqsLen = length($originexonCDSseqs);
                 $originCDSexonseqsLen = length($originCDSexonseqs); #### ##### 1. report value.
-                our $originCDSexonRmLastexonseqLen = 0;  ####2. report value
+                my $originCDSexonRmLastexonseqLen = 0;  ####2. report value
                  
                 $originCDSexonRmLastexonseqLen = $originCDSexonseqsLen - length($exonseqs{$tmptransid}[$transexonnumbers]); ### Get penultimate CDS + exons seq length.
 
@@ -1893,18 +1900,34 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                     my $originFullCDS="";
                     my $originFullCDSlen="";
+
                     for (my $tmpk =$startcodon_exonnumber; $tmpk <= $stopcodon_exonnumber; $tmpk ++){
                         $originFullCDS .= $CDSseqs{$tmptransid}[$tmpk];
 
                     }
                     $originFullCDSlen = length($originFullCDS);    #### original CDSs length.
 
+                    my $originCDSexonseqs="";
+                    my $originCDSexonseqsLen="";
+                    
+                    for (my $tmpz =$startcodon_exonnumber; $tmpz <= $transexonnumbers; $tmpz ++){
+                        if ($tmpz == $startcodon_exonnumber){
+                            $originFullCDS .= $CDSseqs{$tmptransid}[$tmpz];
+
+                        }else{
+                            $originFullCDS .= $exonseqs{$tmptransid}[$tmpz];
+                        }
+
+                    }
+                    $originCDSexonseqsLen = length($originCDSexonseqs);    #### original CDSs length.
+
                     my $addedSEseqlen = length($SEseq);
                     my $originCDSlen = $tmpaccOriginCDSlen{$transexonnumbers};
                     my $addSECDSlen = $tmpaccAddCDSlen{$transexonnumbers};
 
                     my $originCDSexonRmLastexonseqLen =0;     ##### Tell Original CDS NMD signal $dj. 2021.05.06
-                    $originCDSexonRmLastexonseqLen = $tmpaccOriginCDSlen{$transexonnumbers-1};
+                    # $originCDSexonRmLastexonseqLen = $tmpaccOriginCDSlen{$transexonnumbers-1};
+                    $originCDSexonRmLastexonseqLen = $originCDSexonseqsLen - length($exonseqs{$tmptransid}[$transexonnumbers]);
                     my $originCDSdj = 0;
                     $originCDSdj = $originCDSexonRmLastexonseqLen - ($originFullCDSlen + 3); ##### Bug fix +3 as a stop codon. 2021.06.02
                     my $flagOriginNMD ="-";
