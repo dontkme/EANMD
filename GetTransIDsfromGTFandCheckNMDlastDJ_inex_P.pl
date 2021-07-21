@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome for MM10.EnsGene (Multiple Threads version)v1.350 2021/07/20
+# Get NMD transid from GTF and genome for MM10.EnsGene (Multiple Threads version)v1.351 2021/07/21
 # hukaining@gmail.com
 
 use strict;
@@ -321,7 +321,7 @@ print "Finished loading GTF. Loaded $annotcount annotations.\n";
 
 
 close ANNOT;
-print "All done. Dealed with $annotcount annotations.\n";
+# print "All done. Dealt with $annotcount annotations.\n";
 
 # while ((my $key, my $value) = each %key2PM){  
 # print "$key => $value\n";  
@@ -3361,6 +3361,6 @@ close COMBINEDOUT;
 our $endtime=time();
 #say $starttime;
 #say $endtime;
-printf "Done! %g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
+printf "All done! %g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
 
 
