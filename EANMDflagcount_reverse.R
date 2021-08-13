@@ -3,7 +3,7 @@
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
 ###### EANMDflagcount_reverse.R v1.01
-##### Written by Kaining Hu 2021-07-28
+##### Written by Kaining Hu 2021-08-13
 library(getopt)
 
 spec <- matrix(
@@ -75,8 +75,12 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
       mall$Finalflag[i]="No_NMD"
     }else if (mall$V1.x[i]>0){
       mall$Finalflag[i]="Not_detected"
+    }else if(mall$Same.stop_codon.Need.check[i]>0){
+      mall$Finalflag[i]="Same_stop_codon_Need_check" #Add need_check 2021.08.13
+    }else if(mall$No.stop_codon[i]>0){
+       mall$Finalflag[i]="No_stop_codon" #Add No_stop_codon 2021.08.13
     }else if (mall$NMD_ex[i]>0 && mall$NMD_in[i]>0){
-        mall$Finalflag[i]="NMD_ex_in"
+      mall$Finalflag[i]="NMD_ex_in"
     }else if(mall$NMD_ex[i] >0 && mall$NMD_in[i]==0){
       mall$Finalflag[i]="NMD_ex"
     }else if(mall$NMD_ex[i]==0 && mall$NMD_in[i]>0){
