@@ -2,8 +2,8 @@
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount_reverse.R v1.03
-##### Written by Kaining Hu 2021-08-16
+###### EANMDflagcount_reverse.R v1.04
+##### Written by Kaining Hu 2021-08-23
 library(getopt)
 
 spec <- matrix(
@@ -69,11 +69,11 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
   mallnrow <- nrow(mall) # count number of rows
   print(mallnrow)
   for (i in 1:mallnrow){  #### Reverse ordered 2021-07-28
-    if (mall$No_info[i]>0){
+    if (mall$No_info[i]>0 && mall$No_info[i]>(mall$NMD_ex[i] + mall$NMD_in[i])){   #### Add number compare 2021-08-23
       mall$Finalflag[i]="No_info"
-    }else if (mall[i,3]>0){
+    }else if (mall[i,3]>0 && mall[i,3]>(mall$NMD_ex[i] + mall$NMD_in[i])){
       mall$Finalflag[i]="No_NMD"
-    }else if (mall$V1.x[i]>0){
+    }else if (mall$V1.x[i]>0 && mall$V1.x[i]>(mall$NMD_ex[i] + mall$NMD_in[i]) ){
       mall$Finalflag[i]="Not_detected"
     }else if(mall$Same.stop_codon.Need.check[i]>0){
       mall$Finalflag[i]="Same_stop_codon_Need_check" #Add need_check 2021.08.13
