@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Filter PSI v1.000 2021/09/07
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.000 2021/09/08
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -24,12 +24,12 @@ my $verbose;
 our $FDR=0.05;
 our $DeltaPSIcutoff=0.15;
 our $MXEfold=0.05;
-our $Ainfo;
+# our $Ainfo;
 our $mindepth=20;
 our $mincount=2;
-our $filterpercent=0.3;
-our $samplenum=2;
-our $compares1=1;
+# our $filterpercent=0.3;
+# our $samplenum=4;
+our $compares1=2;
 our $compares2=2;
 
 
@@ -61,6 +61,7 @@ open OUTEAINPUT, "> $opfn.EANMD.input.txt" or die ("[-] Error: Can't open or cre
 #   }else{
 #     die ("[-]Error compare Sample ID.\nPlease confirm to compare sample$compares1 to sample$compares2?\n");
 #   } 
+print "Min depth of averge read counts: $mindepth\nFDR cutoff: $FDR\nThe first sample numbers: $compares1\nThe second sample numbers: $compares2\nMin count of inclution events: $mincount\nThe US and DS fold change cutoff: $MXEfold\n";
   
 print OUT "ID\tGeneID\tgeneSymbol\tchr\tstrand\texonStart_0base\texonEnd\tupstreamES\tupstreamEE\tdownstreamES\tdownstreamEE\tID";
 for (my $i=1;$i<=$compares1;$i++){
@@ -82,7 +83,7 @@ for (my $i=1;$i<=$compares1;$i++){
 for (my $i=1;$i<=$compares2;$i++){
     print OUT "\tIncLevel2_$i";
 }
-print OUT "IncLevelDifference";
+print OUT "\tIncLevelDifference";
 for (my $i=1;$i<=$compares1;$i++){
     print OUT "\tupstream_to_target_count1_$i";
 }
@@ -104,21 +105,24 @@ for (my $i=1;$i<=$compares2;$i++){
 for (my $i=1;$i<=$compares1;$i++){
     print OUT "\tupstream_to_downstream_count1_$i";
 }
-for (my $i=1;$i<=$compares1;$i++){
+for (my $i=1;$i<=$compares2;$i++){
     print OUT "\tupstream_to_downstream_count2_$i";
 }
 print OUT "\tMin_average_counts\tMinJCofInclution\tUp_Down_JC_fold\n";
 
 
-
+our $count1=0;
+our $count2=0;
 
 LINE: while(our $row = <>){	
 #while(our $seq = <SEQFILENAME>){
 	#chomp $row;
-	if ($row =~ m/^\#/) {next;}
+	# if ($row =~ m/^\#/) {next;}
 	
 	my @col =split(/\t/,$row);
 	my $tmpID = $col[0];
+    if ($col[0] eq "ID") {next;}
+        $count1++;
 	my $tmpGeneID = $col[1];
 	my $tmpgeneSymbol = $col[2];
 	my $tmpchr = $col[3];
@@ -141,8 +145,8 @@ LINE: while(our $row = <>){
     my $tmppvalue = $col[18];
     my $tmpFDR = $col[19]; #FDR
  
-    my $IncLevel1 = split(/,/,$col[20]);
-    my $IncLevel2 = split(/,/,$col[21]);
+    my @IncLevel1 = split(/,/,$col[20]);
+    my @IncLevel2 = split(/,/,$col[21]);
     my $tmpPSI = $col[22]; 
 
     my @US2SE = split(/,/,$col[23]); #individual Up Stream Junction Count.
@@ -176,9 +180,9 @@ LINE: while(our $row = <>){
     ### 4. Inclution events' min US|DS JC greater equal to $mincount.
     my $tmpmincount=0;
     if ($tmpPSI>0){
-        $tmpmincount = min(mean($US2SE[0..$compares1-1]),mean($SE2DS[0..$compares1-1]));
+        $tmpmincount = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
     }else{
-        $tmpmincount = min(mean($US2SE[$compares1..($compares1+$compares2-1)]),mean($SE2DS[$compares1..($compares1+$compares2-1)]));
+        $tmpmincount = min(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]));
     }
     
     if ($tmpmincount<$mincount){
@@ -188,17 +192,33 @@ LINE: while(our $row = <>){
     ### 5. Inclution events' min (US|DS JC)/max(US|DS JC) greater equal to $MXEfold.
     my $tmpMXEfold=0;
     if ($tmpPSI>0){
-        $tmpMXEfold = min(mean($US2SE[0..$compares1-1]),mean($SE2DS[0..$compares1-1]))/max(mean($US2SE[0..$compares1-1]),mean($SE2DS[0..$compares1-1]));
+        $tmpMXEfold = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]))/max(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
     }else{
-        $tmpMXEfold = min(mean($US2SE[$compares1..($compares1+$compares2-1)]),mean($SE2DS[$compares1..($compares1+$compares2-1)]))/max(mean($US2SE[$compares1..($compares1+$compares2-1)]),mean($SE2DS[$compares1..($compares1+$compares2-1)]))
+        $tmpMXEfold = min(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]))/max(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]))
     }
 
+    if ($tmpMXEfold< $MXEfold){
+        next;
+    }
 
+    ########## Output
+    $count2++;
+    my $res1=join("\t",@col[0..11],@IJC_S1,@SJC_S1,@IJC_S2,@SJC_S2,@col[16..19],@IncLevel1,@IncLevel2,$tmpPSI,@US2SE,@SE2DS,@SEcount,@US2DS,$minavgreads,$tmpmincount,$tmpMXEfold);
+    # my $resIJCS1=join("\t",@IJC_S1);
+    # my $resSJCS1=join("\t",@SJC_S1);
+    # my $resIJCS2=join("\t",@IJC_S2);
+    # my $resSJCS2=join("\t",@SJC_S2);
+    # my $res2=join();
+
+    # print OUT "$res1\t$resIJCS1\t$resSJCS1\t$resIJCS2\t$resSJCS2\t\n";
+    print OUT "$res1\n";
+    print OUTEAINPUT "$tmpgeneSymbol\t$tmpchr:$tmpSEstart:$tmpSEend:$tmpstrand"."@"."$tmpchr:$tmpUSstart:$tmpUSend:$tmpstrand"."@"."$tmpchr:$tmpDSstart:$tmpDSend:$tmpstrand\t$tmpGeneID\n";
 	
   
 
 
-
 	
 }
+
 close OUT;
+print "All $count1 AS events. Rest $count2 AS events.\n";
