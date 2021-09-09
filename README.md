@@ -1,2 +1,2 @@
 # EANMD
-NMD prediction command-line.
+Exon Annotaion of Nonsense-Mediated mRNA Decay.
