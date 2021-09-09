@@ -1,2 +1,2 @@
 # EANMD
-Exon Annotaion of Nonsense-Mediated mRNA Decay.
+Exon Annotation of Nonsense-Mediated mRNA Decay.
