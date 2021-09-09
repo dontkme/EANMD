@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome for MM10.EnsGene (Multiple Threads version)v1.351 2021/07/21
+# Get NMD transid from GTF and genome for MM10.EnsGene (Multiple Threads version)v1.352 2021/09/09
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance for MM10_ensGene(Multiple Threads version)v1.350 2021/07/20.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance for MM10_ensGene(Multiple Threads version)v1.352 2021/09/09.\n");
 
 ###################sub TRseq##########
  
@@ -652,7 +652,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
         # if ($inputline > 1 and $annotcount % 1000 == 0){
         #         print "Dealed with $annotcount annotations.\n";
         #     }
-        $inputline =~ s/\r\n// ;
+        # $inputline =~ s/\r\n// ;
+        chomp($inputline);
 
         my @tmp = split (/\t/,$inputline);
 
