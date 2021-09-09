@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.000 2021/09/08
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.001 2021/09/09
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -212,6 +212,8 @@ LINE: while(our $row = <>){
 
     # print OUT "$res1\t$resIJCS1\t$resSJCS1\t$resIJCS2\t$resSJCS2\t\n";
     print OUT "$res1\n";
+    $tmpgeneSymbol =~ s/"//g; ### 2021-09-09 rm double quotes.
+    $tmpGeneID =~ s/"//g;
     print OUTEAINPUT "$tmpgeneSymbol\t$tmpchr:$tmpSEstart:$tmpSEend:$tmpstrand"."@"."$tmpchr:$tmpUSstart:$tmpUSend:$tmpstrand"."@"."$tmpchr:$tmpDSstart:$tmpDSend:$tmpstrand\t$tmpGeneID\n";
 	
   
