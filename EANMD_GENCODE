@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.352 2021/09/09
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.353 2021/09/26
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.352 2021/09/09.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.353 2021/09/26.\n");
 
 ###################sub TRseq##########
  
@@ -605,8 +605,9 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
         # if ($inputline > 1 and $annotcount % 1000 == 0){
         #         print "Dealed with $annotcount annotations.\n";
         #     }
-        # $inputline =~ s/\r\n// ; # remove \n 2021-09-09
-        chomp($inputline);
+        #  $inputline =~ s/\r\n// ; # remove \n 2021-09-09
+         $inputline =~ s/\R//g ; # remove \n 2021-09-26
+        # chomp($inputline);
 
         my @tmp = split (/\t/,$inputline);
 
