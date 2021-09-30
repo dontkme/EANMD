@@ -3199,7 +3199,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     }
 
                     
-                    chomp($originFullCDS); ### 2021-09-30 bug fix of $originFullCDS \n.
+                    $originFullCDS =~ s/\R//g; ### 2021-09-30 bug fix of $originFullCDS \n.
                     
                     print OUTUSDSTRANSID "$inputline\t$tmptransid\t$transPM\t$transexonnumbers\t$DStransexonnumber\t$UStransexonnumber\t$innerExonsofUSandDS\t$SEtransexonumber\t$stopcodon_exonnumber\t$startcodon_exonnumber";
                     print OUTUSDSTRANSID "\t$flag1\t$addedSEseqlen\t$originFullCDSlen\t$originCDSlen\t$addSECDSlen\t$SEseq\t$originFullCDS\t$tmpOriginCDS\t$tmpAddCDS";
