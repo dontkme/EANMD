@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome for MM10.EnsGene (Multiple Threads version)v1.353 2021/09/26
+# Get NMD transid from GTF and genome for MM10.EnsGene (Multiple Threads version)v1.354 2021/09/30
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance for MM10_ensGene(Multiple Threads version)v1.353 2021/09/26.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance for MM10_ensGene(Multiple Threads version)v1.354 2021/09/30.\n");
 
 ###################sub TRseq##########
  
@@ -3199,8 +3199,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     }
 
                     
+                    chomp($originFullCDS); ### 2021-09-30 bug fix of $originFullCDS \n.
                     
-
                     print OUTUSDSTRANSID "$inputline\t$tmptransid\t$transPM\t$transexonnumbers\t$DStransexonnumber\t$UStransexonnumber\t$innerExonsofUSandDS\t$SEtransexonumber\t$stopcodon_exonnumber\t$startcodon_exonnumber";
                     print OUTUSDSTRANSID "\t$flag1\t$addedSEseqlen\t$originFullCDSlen\t$originCDSlen\t$addSECDSlen\t$SEseq\t$originFullCDS\t$tmpOriginCDS\t$tmpAddCDS";
                     print OUTUSDSTRANSID "\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originFullCDSAA\t$originCDSseqsAA\t$AddSEexonseqsAA\t$originFullCDSAA_1stPos\t$originFullCDSAA_allPos\t$originCDSseqsAA_1stPos\t$originCDSseqsAA_allPos\t$AddSEexonseqsAA_1stPos\t$AddSEexonseqsAA_allPos";
