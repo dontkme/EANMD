@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# FilterATG of EANMD outCombined file v1.0 2021/09/30
+# FilterATG of EANMD outCombined file v1.01 2021/10/01
 # hukaining@gmail.com
 
 use strict;
@@ -25,7 +25,7 @@ or die("[-]Error in command line arguments
     options:
     [-o string|outprefix Default: filterATGOut]
     [-s string|Start_codon to remain. default: \"ATG\"]
-    Note: Filter the records in EANMD outCombined file which the start codon is not \"ATG\". v1.0 2021/09/30.\n");
+    Note: Filter the records in EANMD outCombined file which the start codon is not \"ATG\". v1.01 2021/10/01.\n");
 
 
 if (not @ARGV) {
@@ -33,7 +33,7 @@ if (not @ARGV) {
 }
 our $loadingstarttime=time();
 print "Start loading EANMD outCombined file: @ARGV \n";
-print "Start condon: $startcodon\n";
+print "Start codon: $startcodon\n";
 open OUT, "> $opfn.filter.$startcodon.outCombined.txt" or die ("[-] Error: Can't open or create $opfn.filter.$startcodon.outCombined.txt\n");
 print OUT "QueryCol1\tSEUSDSCoordinates\tQueryCol3\tTranscript_id\tStrand\tExons\tStart_exon\tStop_exon\tSE_exon_Number\tSE(US)_Pos\tSE_length\tOri_CDS_length\tOri_Star_codon_to_exon_end_seq_len\trm/add_SE_start_to_end_seq_len";
 print OUT "\tSEseq\tOri_CDSexons_seq\trm/add_SE_CDSexons_seq\tOri_last_junction_pos\tOri_last_dj\tOri_NMD\tStart_codon\tOri_AA\trm/add_SE_AA";
