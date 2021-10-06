@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.354 2021/09/30
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.360 2021/10/06
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.354 2021/09/30.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.360 2021/10/06.\n");
 
 ###################sub TRseq##########
  
@@ -1914,10 +1914,10 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     
                     for (my $tmpz =$startcodon_exonnumber; $tmpz <= $transexonnumbers; $tmpz ++){
                         if ($tmpz == $startcodon_exonnumber){
-                            $originFullCDS .= $CDSseqs{$tmptransid}[$tmpz];
+                            $originCDSexonseqs .= $CDSseqs{$tmptransid}[$tmpz];  ### Bug fix $originCDSexonseqs 2021-10-06
 
                         }else{
-                            $originFullCDS .= $exonseqs{$tmptransid}[$tmpz];
+                            $originCDSexonseqs .= $exonseqs{$tmptransid}[$tmpz];
                         }
 
                     }
