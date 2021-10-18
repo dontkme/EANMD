@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.370 2021/10/18
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.371 2021/10/18
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.370 2021/10/18.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.371 2021/10/18.\n");
 
 ###################sub TRseq##########
  
@@ -2221,6 +2221,7 @@ print COMBINEDOUT "\tUStransexonnumber\tDStransexonnumber\tinnerExonsofUSandDS\n
 
 
 while (my $rmSEres=<USSEDSRES>){
+    $rmSEres =~ s/\R//g; #2021-10-18 remove \n
     my @tmprmSEres = split("\t",$rmSEres);
     print COMBINEDOUT "$tmprmSEres[0]";
     my @rmSEcolumn =(1..4,6..8,5,9,13,18,20,19,10,16,17,21..24,25..26,27..32,39,40); 
@@ -2256,6 +2257,7 @@ while (my $rmSEres=<USSEDSRES>){
 }
 
 while (my $addSEres=<USDSRES>){
+    $addSEres =~ s/\R//g; #2021-10-18 remove \n
     my @tmpaddSEres = split("\t",$addSEres);
     print COMBINEDOUT "$tmpaddSEres[0]";
     my @addSEcolumn =(1..5,10,11,9,12..18,20,21..24,25,27,29..34,37,40); #2021-10-18 add 6..8
