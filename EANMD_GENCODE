@@ -2274,7 +2274,7 @@ while (my $addSEres=<USDSRES>){
     unless($tmpSEupsteramCDSAALen eq ""){
         $tmpSEupsteramCDSAALen=sprintf("%.1f", $tmpSEupsteramCDSAALen);
     }
-    print COMBINEDOUT "\t$tmpNMDinexflag\tUSDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmprmSEres[6]\t$tmprmSEres[7]\t$tmprmSEres[8]\n";
+    print COMBINEDOUT "\t$tmpNMDinexflag\tUSDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmpaddSEres[6]\t$tmpaddSEres[7]\t$tmpaddSEres[8]\n";
 
 }
 
