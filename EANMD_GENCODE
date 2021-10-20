@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.372 2021/10/18
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.373 2021/10/20
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.372 2021/10/18.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.373 2021/10/20.\n");
 
 ###################sub TRseq##########
  
@@ -946,7 +946,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                         print OUTUSSEDSTRANSID "\t";
                     }
                     print OUTUSSEDSTRANSID "\t\t";
-                    print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
+                    print OUTUSSEDSTRANSID "$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers. #2021-10-18 rm 1 \t.
 
 
                 }elsif($setransexonid > $startcodon_exonnumber and $setransexonid < $stopcodon_exonnumber){ ######### SE was inner exon. start remove SE.
