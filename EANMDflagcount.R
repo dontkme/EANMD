@@ -71,14 +71,13 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
   for (i in 1:mallnrow){
     if (mall$Start_codon[i]>0){    ### 2021-10-20 Start codon as 1st order.
       mall$Finalflag[i]="Start_codon"
-    } else if (mall$NMD_ex[i]>0 && mall$NMD_in[i]>0){
+    }else if(mall$NMD_ex[i]>0 && mall$NMD_in[i]>0){
       mall$Finalflag[i]="NMD_ex_in"
     }else if(mall$NMD_ex[i]==0 && mall$NMD_in[i]>0){
       mall$Finalflag[i]="NMD_in"
-    }else if(mall$NMD_ex[i] >0 && mall$NMD_in[i]==0){
+    }else if(mall$NMD_ex[i]>0 && mall$NMD_in[i]==0){
       mall$Finalflag[i]="NMD_ex"
-    # }else if(mall$NMD_ex[i]==0 && mall$NMD_in[i]==0 && mall$Start_codon[i]>0){
-    }else if(mall$X5UTR[i]>0 ){
+    }else if(mall$X5UTR[i]>0){
       mall$Finalflag[i]="5UTR"
     }else if((mall$Upstream.stop_codon[i] + mall$Downstream.stop_codon[i])>0){
       mall$Finalflag[i]="ORF_changing"
