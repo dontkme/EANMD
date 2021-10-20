@@ -2,8 +2,8 @@
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount.R v1.00
-##### Written by Kaining Hu 2021-07-20
+###### EANMDflagcount.R v1.10
+##### Written by Kaining Hu 2021-10-20
 library(getopt)
 
 spec <- matrix(
@@ -69,15 +69,15 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
   mallnrow <- nrow(mall) # count number of rows
   print(mallnrow)
   for (i in 1:mallnrow){
-    if (mall$NMD_ex[i]>0 && mall$NMD_in[i]>0){
+    if (mall$Start_codon[i]>0){    ### 2021-10-20 Start codon as 1st order.
+      mall$Finalflag[i]="Start_codon"
+    } else if (mall$NMD_ex[i]>0 && mall$NMD_in[i]>0){
       mall$Finalflag[i]="NMD_ex_in"
-    }else if(mall$NMD_ex[i] >0 && mall$NMD_in[i]==0){
-      mall$Finalflag[i]="NMD_ex"
     }else if(mall$NMD_ex[i]==0 && mall$NMD_in[i]>0){
       mall$Finalflag[i]="NMD_in"
+    }else if(mall$NMD_ex[i] >0 && mall$NMD_in[i]==0){
+      mall$Finalflag[i]="NMD_ex"
     # }else if(mall$NMD_ex[i]==0 && mall$NMD_in[i]==0 && mall$Start_codon[i]>0){
-    }else if( mall$Start_codon[i]>0){
-      mall$Finalflag[i]="Start_codon"
     }else if(mall$X5UTR[i]>0 ){
       mall$Finalflag[i]="5UTR"
     }else if((mall$Upstream.stop_codon[i] + mall$Downstream.stop_codon[i])>0){
@@ -90,8 +90,8 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
       mall$Finalflag[i]="Same_stop_codon_Need_check"
     }else if(mall$X3UTR[i]>0){
       mall$Finalflag[i]="3UTR"
-    }else if(mall$Same.stop_codon[i]>0){
-      mall$Finalflag[i]="Same.stop_codon"
+    # }else if(mall$Same.stop_codon[i]>0){
+    #   mall$Finalflag[i]="Same.stop_codon"
     }else{
       mall$Finalflag[i]="Other"
     }
