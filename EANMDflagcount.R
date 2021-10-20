@@ -2,7 +2,7 @@
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount.R v1.11
+###### EANMDflagcount.R v1.12
 ##### Written by Kaining Hu 2021-10-20
 library(getopt)
 
@@ -87,8 +87,8 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
       mall$Finalflag[i]="No_stop_codon"
     }else if(mall$Same.stop_codon.Need.check[i]>0){
       mall$Finalflag[i]="Same_stop_codon_diff_from_annot"
-    }else if(mall$Stop_codon[i]>0){
-      mall$Finalflag[i]="Stop_codon"
+    # }else if(mall$Stop_codon[i]>0){
+    #   mall$Finalflag[i]="Stop_codon"
     }else if(mall$X3UTR[i]>0){
       mall$Finalflag[i]="3UTR"
     # }else if(mall$Same.stop_codon[i]>0){
