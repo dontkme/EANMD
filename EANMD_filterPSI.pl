@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.100 2021/09/23
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.101 2021/11/19
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -35,11 +35,11 @@ our $compares2=2;
 
 
 GetOptions("o=s" => \$opfn,"d=i"=>\$mindepth,"m=i"=>\$mincount,"i=f"=>\$DeltaPSIcutoff,"f=f"=>\$FDR,"mf=f"=>\$MXEfold,"c1=i"=>\$compares1,"c2=i"=>\$compares2,"verbose"=>\$verbose)
-	or die("[-]Error in command line arguments\n    Filter PSI v1.100 2021/09/23\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
+	or die("[-]Error in command line arguments\n    Filter PSI v1.101 2021/11/19\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
   options:\n
 	 [-o output prefix. default: rMATS_filtered.out]\n
-	 [-d int|min depth of averge read counts. default: 20]\n
-     [-m int|min count of inclution events' UP|Downstream junction. default: 2]\n
+	 [-d int|min depth of average read counts. default: 20]\n
+     [-m int|min count of inclusion events' UP|Downstream junction. default: 2]\n
 	 [-i float|delta PSI cutoff [0-1.0]. default: 0.15]\n
 	 [-f float|FDR cutoff [0-1.0]. default: 0.05]\n
 	 [-c1 int|The first sample numbers.  default: 2]\n
@@ -62,7 +62,7 @@ open OUTEAINPUT, "> $opfn.EANMD.input.txt" or die ("[-] Error: Can't open or cre
 #   }else{
 #     die ("[-]Error compare Sample ID.\nPlease confirm to compare sample$compares1 to sample$compares2?\n");
 #   } 
-print "Min depth of averge read counts: $mindepth\ndelta PSI cutoff: $DeltaPSIcutoff\nFDR cutoff: $FDR\nThe first sample numbers: $compares1\nThe second sample numbers: $compares2\nMin count of inclution events: $mincount\nThe US and DS fold change cutoff: $MXEfold\n";
+print "Min depth of averge read counts: $mindepth\ndelta PSI cutoff: $DeltaPSIcutoff\nFDR cutoff: $FDR\nThe first sample numbers: $compares1\nThe second sample numbers: $compares2\nMin count of inclusion events: $mincount\nThe US and DS fold change cutoff: $MXEfold\n";
   
 print OUT "ID\tGeneID\tgeneSymbol\tchr\tstrand\texonStart_0base\texonEnd\tupstreamES\tupstreamEE\tdownstreamES\tdownstreamEE\tID";
 for (my $i=1;$i<=$compares1;$i++){
@@ -109,7 +109,7 @@ for (my $i=1;$i<=$compares1;$i++){
 for (my $i=1;$i<=$compares2;$i++){
     print OUT "\tupstream_to_downstream_count2_$i";
 }
-print OUT "\tMin_average_counts\tMinJCofInclution\tUp_Down_JC_fold\n";
+print OUT "\tMin_average_counts\tMinJCofInclusion\tUp_Down_JC_fold\n";
 
 
 our $count1=0;
@@ -178,7 +178,7 @@ LINE: while(our $row = <>){
         next;
     }
 
-    ### 4. Inclution events' min US|DS JC greater equal to $mincount.
+    ### 4. Inclusion events' min US|DS JC greater equal to $mincount.
     my $tmpmincount=0;
     if ($tmpPSI>0){
         $tmpmincount = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
@@ -190,7 +190,7 @@ LINE: while(our $row = <>){
         next;
     }
 
-    ### 5. Inclution events' min (US|DS JC)/max(US|DS JC) greater equal to $MXEfold.
+    ### 5. Inclusion events' min (US|DS JC)/max(US|DS JC) greater equal to $MXEfold.
     my $tmpMXEfold=0;
     if ($tmpPSI>0){
         $tmpMXEfold = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]))/max(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
