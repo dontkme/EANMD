@@ -49,7 +49,7 @@ while(defined(our $line = <>)){
     my $source=$tmp[32];
     my $inUSDSexonnumbers=$tmp[37];
         $inUSDSexonnumbers =~ s/\R//g;
-    if ($Pos ne "5UTR" && $Start_codon !~ m/$startcodon/g){ ### Rule
+    if ($Pos ne "5UTR" && $Start_codon !~ m/$startcodon/ig){ ### Rule
         next;
     }elsif($Pos ne "5UTR" && $source eq "USSEDS" && $inUSDSexonnumbers >1){
         next;
