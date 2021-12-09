@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2021
-# Filter EANMD outCombined file v1.10 2021/10/20
+# Filter EANMD outCombined file v1.11 2021/12/09
 # hukaining@gmail.com
 
 use strict;
@@ -25,7 +25,7 @@ or die("[-]Error in command line arguments
     options:
     [-o string|outprefix Default: filteredOut]
     [-s string|Start_codon to remain. default: \"ATG\"]
-    Note: Filter the records in EANMD outCombined file by start codon and MXE. v1.10 2021/10/10.\n");
+    Note: Filter the records in EANMD outCombined file by start codon and MXE. v1.11 2021/12/09.\n");
 
 
 if (not @ARGV) {
@@ -49,7 +49,7 @@ while(defined(our $line = <>)){
     my $source=$tmp[32];
     my $inUSDSexonnumbers=$tmp[37];
         $inUSDSexonnumbers =~ s/\R//g;
-    if ($Pos ne "5UTR" && $Start_codon !~ m/$startcodon/ig){ ### Rule
+    if ($Pos ne "5UTR" && $Start_codon !~ m/$startcodon/ig){ ### Rule ###2021.12.09 add i
         next;
     }elsif($Pos ne "5UTR" && $source eq "USSEDS" && $inUSDSexonnumbers >1){
         next;
