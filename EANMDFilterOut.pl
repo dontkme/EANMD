@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2022
-# Filter EANMD outCombined file v1.20 2022/01/14
+# Filter EANMD outCombined file v1.21 2022/01/16
 # hukaining@gmail.com
 
 use strict;
@@ -25,7 +25,7 @@ or die("[-]Error in command line arguments
     options:
     [-o string|outprefix Default: filteredOut]
     [-s string|Start_codon to remain. default: \"ATG\"]
-    Note: Filter the records in EANMD outCombined file by start codon, MXE and CDS length. v1.20 2022/01/14.\n");
+    Note: Filter the records in EANMD outCombined file by start codon, MXE and CDS length. v1.21 2022/01/16.\n");
 
 
 if (not @ARGV) {
@@ -57,7 +57,7 @@ while(defined(our $line = <>)){
         next;
     }elsif($Pos ne "5UTR" && $source eq "USDS" && $inUSDSexonnumbers >0){
         next;
-    }elsif($Pos ne "5UTR" && $Pos ne "Start_codon" && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.14.
+    }elsif($Pos ne "5UTR" && $Pos ne "Start_codon" && $Pos ne "3UTR"&& $Pos ne "Stop_codon" && $oriAAlen ne '-' && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.16.
         next;
     }else{
         $count2++;
