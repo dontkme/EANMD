@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2022
-# Transformation NMD unique flag results into GTF v0.1100 2022/03/01
+# Transformation NMD unique flag results into GTF v1.000 2022/03/01
 # hukaining@gmail.com
 
 use strict;
@@ -44,7 +44,7 @@ or die("[-]Error in command line arguments
     [-s string|Delimiter of gene name and chromosome. Default: \"_chr\"]
     [-f string|Specify feature type in GTF annotation. Default: CDS]
 	 
-    Note: Transformation NMD unique flag results into GTF v0.1100 2022/03/01\n");
+    Note: Transformation NMD unique flag results into GTF v1.000 2022/03/01\n");
 
 
 
@@ -124,6 +124,8 @@ if (not $ARGV[0]) {
 
 our $starttime=time();
 print "Running. Please wait for a minite.\n";
+open OUTGTF, "> $opfn.gtf" or die ("[-] Error: Can't open or create file: $opfn.gtf \n");
+print OUTGTF "#\n";
 
 our $annotcount=0;
 our @tmp;
@@ -131,6 +133,7 @@ our @tmp;
 while(defined(our $inrow = <>)){
 
     if ($inrow =~ m/^\#/) {next;}
+    if ($inrow =~ m/^""/) {next;}
     if ($annotcount % 100 == 0){
         print "Dealed with $annotcount results.\n";
     }
@@ -140,11 +143,48 @@ while(defined(our $inrow = <>)){
     my $flag=$tmp[$uf_no-1];
     $ASevents =~ s/"//g;
     $flag =~ s/"//g;
-    $flag =~ s/\s//g;
+    $flag =~ s/\s//g;  ### Output value.
     my @AS_detail=split(/@/, $ASevents);
     # print "@AS_detail\t$flag\n";
 
     $annotcount++;
+    ########
+    # split AS_events
+    ########
+
+    my @AS_name_a = split(/$sepchr/,$AS_detail[0]);
+    # print "$AS_name_a[0]\n";
+    my $Gene_name = $AS_name_a[0];
+    my @SE=split(/:/, $AS_detail[0]);
+    my $SES=$SE[1];
+    my $SEE=$SE[2];
+    # print "@SE\n";
+    my @US=split(/:/, $AS_detail[1]);
+    my @DS=split(/:/, $AS_detail[2]);
+    # print "@DS\n";
+    my $chr=$US[0];
+    my $MP=$US[3];
+
+    my $USS=$US[1];
+    my $USE=$US[2];
+    my $DSS=$DS[1];
+    my $DSE=$DS[2];
+
+    #fix bed 0-base:
+    $SES++;
+    $USS++;
+    $DSS++;
+
+    # print "$chr\n";
+    # print "$MP\n";
+    my $outlineUS = join("\t", $chr, "EANMD",$feature, $USS,$USE,".",$MP,".","gene_id \"$Gene_name\"; transcript_id \"$ASevents\"; gene_name \"$Gene_name\"; gene_source \"US\"; gene_biotype \"$flag\";\n");
+    print OUTGTF "$outlineUS";
+    my $outlineSE = join("\t", $chr, "EANMD",$feature, $SES,$SEE,".",$MP,".","gene_id \"$Gene_name\"; transcript_id \"$ASevents\"; gene_name \"$Gene_name\"; gene_source \"SE\"; gene_biotype \"$flag\";\n");
+    print OUTGTF "$outlineSE";
+    my $outlineDS = join("\t", $chr, "EANMD",$feature, $DSS,$DSE,".",$MP,".","gene_id \"$Gene_name\"; transcript_id \"$ASevents\"; gene_name \"$Gene_name\"; gene_source \"DS\"; gene_biotype \"$flag\";\n");
+    print OUTGTF "$outlineDS";
+
+
 }
 
 
@@ -155,4 +195,5 @@ while(defined(our $inrow = <>)){
 our $endtime=time();
 #say $starttime;
 #say $endtime;
+print "$annotcount records.\n";
 printf "Done! %g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
