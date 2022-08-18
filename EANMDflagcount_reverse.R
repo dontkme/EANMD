@@ -12,20 +12,20 @@ spec <- matrix(
     #"Rank", "r", 1, "character",  "flag rank",
     "Input",  "i", 2, "character",  "Input combined file",
     "help",   "h", 0, "logical",  "Detail Help"),
-  byrow=TRUE, ncol=5
+  byrow = TRUE, ncol = 5
   )
 
 
-opt <- getopt(spec=spec)
-if(is.null(opt$Output)){
+opt <- getopt(spec = spec)
+if (is.null(opt$Output)) {
   opt$Output <- opt$Input
 }
 # print(opt)
 
 
-if( !is.null(opt$help) || is.null(opt$Input) || is.null(opt$Output) ){
+if(!is.null(opt$help) || is.null(opt$Input) || is.null(opt$Output) ) {
   # ... 
-  cat(paste(getopt(spec=spec, usage = T), "\n"))
+  cat(paste(getopt(spec = spec, usage = T), "\n"))
   
   quit()
 }
@@ -40,38 +40,38 @@ attach(TFNMD)
  TFNMD$key <- paste(TFNMD$QueryCol1,TFNMD$SEUSDSCoordinates,sep="_")
  # sortedTFNMD <- TFNMD[order(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
  sortedTFNMD <- TFNMD[order(TFNMD$QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
- keytable2<- table( sortedTFNMD$key,sortedTFNMD$NMD_in.ex_flag)
+ keytable2 <- table(sortedTFNMD$key, sortedTFNMD$NMD_in.ex_flag)
  # head(keytable2)
- keytable2outname <- paste(opt$Output,"Key2NMDex_in_table.txt",sep=".")
+ keytable2outname <- paste(opt$Output, "Key2NMDex_in_table.txt", sep = ".")
  # print(keytable2outname)
-write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
- SEUS_Pos_table2<- table( sortedTFNMD$key,sortedTFNMD$SE.US._Pos)
+write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
+SEUS_Pos_table2 <- table(sortedTFNMD$key, sortedTFNMD$SE.US._Pos)
  # head(SEUS_Pos_table2)
- SEUS_Pos_table2outname <- paste(opt$Output,"Key2SEUS_POS_table.txt",sep=".")
+SEUS_Pos_table2outname <- paste(opt$Output, "Key2SEUS_POS_table.txt", sep = ".")
  # print(SEUS_Pos_table2outname)
-  write.table(SEUS_Pos_table2,file=SEUS_Pos_table2outname,sep = "\t",col.names=NA)
- Framekeytable2<- table( sortedTFNMD$key,sortedTFNMD$Frame_shift_flag)
+write.table(SEUS_Pos_table2, file = SEUS_Pos_table2outname, sep = "\t", col.names = NA)
+Framekeytable2 <- table(sortedTFNMD$key, sortedTFNMD$Frame_shift_flag)
  # head(Framekeytable2)
- Framekeytable2outname <- paste(opt$Output,"Key2Frame_flag_table.txt", sep = ".")
+Framekeytable2outname <- paste(opt$Output, "Key2Frame_flag_table.txt", sep = ".")
  # print(Framekeytable2outname)
-  write.table(Framekeytable2,file = Framekeytable2outname,sep = "\t", col.names = NA)
+write.table(Framekeytable2,file = Framekeytable2outname,sep = "\t", col.names = NA)
 # mergedfile<- merge(merge(keytable2,SEUS_Pos_table2,by="key"),Framekeytable2 ,by="key")
 # head(mergedfile)
   keytable2 <- as.data.frame.matrix(keytable2)
   SEUS_Pos_table2 <- as.data.frame.matrix(SEUS_Pos_table2)
   Framekeytable2 <- as.data.frame.matrix(Framekeytable2)
-  ma<- merge(keytable2,Framekeytable2, b = 0)
+  ma <- merge(keytable2, Framekeytable2, by = 0)
   row.names(ma) <- ma$Row.names
   ma$Row.names <- NULL
-  mall <- merge(ma,SEUS_Pos_table2, by = 0)
+  mall <- merge(ma, SEUS_Pos_table2, by = 0)
   mallname <- paste(opt$Output, "FinalUniqNMDflag.txt", sep = ".")
   names(mall) <- make.names(names(mall)) # make.names of safe column names
   mallnrow <- nrow(mall) # count number of rows
   print(mallnrow)
-  for (i in 1:mallnrow){  #### Reverse ordered 2021-07-28
-    if (!is.null(mall$No_info[i]) && mall$No_info[i]>0 && mall$No_info[i]>(mall$NMD_ex[i] + mall$NMD_in[i])){   #### Add number compare 2021-08-23
-      mall$Finalflag[i] = "No_info"
-    }else if (!is.null(mall$[i,3]) && mall[i,3] > 0 && mall[i,3] > (mall$NMD_ex[i] + mall$NMD_in[i])){
+  for (i in 1:mallnrow) {  #### Reverse ordered 2021-07-28
+    if (!is.null(mall$No_info[i]) && mall$No_info[i]>0 && mall$No_info[i]>(mall$NMD_ex[i] + mall$NMD_in[i])) {   #### Add number compare 2021-08-23
+      mall$Finalflag[i] <- "No_info"
+    }else if (!is.null(mall[i,3]) && mall[i,3] > 0 && mall[i,3] > (mall$NMD_ex[i] + mall$NMD_in[i])) {
       mall$Finalflag[i]="No_NMD"
     }else if (!is.null(mall$V1.x[i]) && mall$V1.x[i]>0 && mall$V1.x[i]>(mall$NMD_ex[i] + mall$NMD_in[i]) ){
       mall$Finalflag[i]="Not_detected"
@@ -83,7 +83,7 @@ write.table(keytable2,file = keytable2outname,sep = "\t",col.names=NA)
        mall$Finalflag[i]="Start_codon" #Add Start_codon 2021.08.16
     }else if (!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && mall$NMD_ex[i]>0 && mall$NMD_in[i]>0){
       mall$Finalflag[i]="NMD_ex_in"
-    }else if(!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && && mall$NMD_ex[i] >0 && mall$NMD_in[i]==0){
+    }else if(!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && mall$NMD_ex[i] >0 && mall$NMD_in[i]==0){
       mall$Finalflag[i]="NMD_ex"
     }else if(!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && mall$NMD_ex[i]==0 && mall$NMD_in[i]>0){
       mall$Finalflag[i]="NMD_in"
