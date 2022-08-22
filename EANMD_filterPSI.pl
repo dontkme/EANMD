@@ -162,20 +162,20 @@ LINE: while(our $row = <>){
         next;
     }
 
-    #### 2. Min average read count has to greater than $mindepth .
-    ### 2. Max average read count has to greater than $mindepth .
+    # 2. Min average read count has to greater than $mindepth .
+    ## 2. Max average read count has to greater than $mindepth .
 
 
     my $meanS1reads = ((sum @IJC_S1) + (sum @SJC_S1))/$compares1;
     my $meanS2reads = ((sum @IJC_S2) + (sum @SJC_S2))/$compares2;
     my $minavgreads = min($meanS1reads, $meanS2reads);
     my $maxavgreads = max($meanS1reads, $meanS2reads);
-    # if ($minavgreads < $mindepth){
-    #     next;
-    # }
-    if ($maxavgreads < $mindepth){
+    if ($minavgreads < $mindepth){
         next;
     }
+    # if ($maxavgreads < $mindepth){
+    #     next;
+    # }
     
     ### 3. PSI cutoff. $DeltaPSIcutoff
 
@@ -183,12 +183,15 @@ LINE: while(our $row = <>){
         next;
     }
 
-    ### 4. Inclusion events' min US|DS JC greater equal to $mincount.
+    ## 4. Inclusion events' min US|DS JC greater equal to $mincount.
+    # 4. Inclusion events' max US|DS JC greater equal to $mincount.
     my $tmpmincount=0;
     if ($tmpPSI>0){
-        $tmpmincount = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
+        # $tmpmincount = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
+        $tmpmincount = max(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
     }else{
-        $tmpmincount = min(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]));
+        # $tmpmincount = min(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]));
+        $tmpmincount = max(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]));
     }
     
     if ($tmpmincount<$mincount){
