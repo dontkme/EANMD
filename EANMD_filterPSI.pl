@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
 #AUTHORS
-# Kaining Hu (c) 2021
-# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.101 2021/11/19
+# Kaining Hu (c) 2022
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.200 2022/08/22
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -162,13 +162,18 @@ LINE: while(our $row = <>){
         next;
     }
 
-    ### 2. Min average read count has to greater than $mindepth .
+    #### 2. Min average read count has to greater than $mindepth .
+    ### 2. Max average read count has to greater than $mindepth .
 
 
     my $meanS1reads = ((sum @IJC_S1) + (sum @SJC_S1))/$compares1;
     my $meanS2reads = ((sum @IJC_S2) + (sum @SJC_S2))/$compares2;
     my $minavgreads = min($meanS1reads, $meanS2reads);
-    if ($minavgreads < $mindepth){
+    my $maxavgreads = max($meanS1reads, $meanS2reads);
+    # if ($minavgreads < $mindepth){
+    #     next;
+    # }
+    if ($maxavgreads < $mindepth){
         next;
     }
     
