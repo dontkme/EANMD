@@ -3,7 +3,7 @@
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
 ###### EANMDflagcount_reverse.R v1.04
-##### Written by Kaining Hu 2021-08-23
+##### Written by Kaining Hu 2022-08-23
 library(getopt)
 
 spec <- matrix(
