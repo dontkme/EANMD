@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2022
-# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.200 2022/08/22
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. EANMD_fileterPSI v1.250 2023/01/10
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -35,7 +35,7 @@ our $compares2=2;
 
 
 GetOptions("o=s" => \$opfn,"d=i"=>\$mindepth,"m=i"=>\$mincount,"i=f"=>\$DeltaPSIcutoff,"f=f"=>\$FDR,"mf=f"=>\$MXEfold,"c1=i"=>\$compares1,"c2=i"=>\$compares2,"verbose"=>\$verbose)
-	or die("[-]Error in command line arguments\n    Filter PSI v1.101 2021/11/19\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
+	or die("[-]Error in command line arguments\n    Filter PSI v1.25 2023/01/10\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
   options:\n
 	 [-o output prefix. default: rMATS_filtered.out]\n
 	 [-d int|min depth of average read counts. default: 20]\n
