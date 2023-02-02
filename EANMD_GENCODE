@@ -1,8 +1,8 @@
 ﻿#!/usr/bin/env perl
 
 #AUTHORS
-# Kaining Hu (c) 2021
-# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.374 2021/10/28
+# Kaining Hu (c) 2023
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.41 2023/02/02
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.373 2021/10/20.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version) v1.41 2023/02/02.\n");
 
 ###################sub TRseq##########
  
@@ -1167,8 +1167,24 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                         }
 
                     }elsif ($flag1 eq "ORF preserving"){
+
                         $flag4 = $flagOriginNMD;
                         $flagEx_inNMD = "No_info";
+
+                    }elsif ($flag1 eq "No stop_codon"){ ### 2022-02-02 add no_stop_codon tell NMD_in/ex
+
+                        $flag4 = "No stop_codon";
+                        # $flagEx_inNMD = "No_info";
+
+                        if ($flagOriginNMD eq "NMD"){
+                            
+                            $flagEx_inNMD = "NMD_in";
+                        
+                        }else{
+                            
+                            $flagEx_inNMD = "-";
+                            
+                        }
                     }
 
                     # if ($flagOriginNMD eq "NMD"){
@@ -1713,6 +1729,20 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                             }
                         }
 
+                    }elsif($flag1 eq "No stop_codon"){ #### 2023-02-02, add No stop_codon NMD_in/ex estimate.
+                        
+                        $flag4 = "No stop_codon";
+
+                        if ($flagOriginNMD eq "NMD"){
+                            
+                            $flagEx_inNMD = "NMD_in";
+                            
+                        }else{
+                            
+                            $flagEx_inNMD = "-";
+                            
+                        }
+
                     }
 
 
@@ -2123,6 +2153,19 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                         }
                     }
 
+                    if ($flag2 eq "No stop_codon"){ ### 2022-02-02 add no_stop_codon tell NMD_in/ex
+                        $flagnmd = "No stop_codon";
+                        # $flagEx_inNMD = "No_info";
+                        if ($flagOriginNMD eq "NMD"){
+                            
+                                $flagEx_inNMD = "NMD_ex";
+                            
+                        }else{
+                            
+                                $flagEx_inNMD = "-";
+                            
+                        }
+                    }
                     
                     $originFullCDS =~ s/\R//g ; ### 2021-09-30 bug fix of $originFullCDS \n.
 
