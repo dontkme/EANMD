@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2023
-# EANMD convert rMATS results to an EANMD AS_events input list. GetA3SSinput v1.100 2023/02/06
+# EANMD convert rMATS results to an EANMD AS_events input list. GetA5SSinput v1.100 2023/02/06
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -21,9 +21,9 @@ our $compares2=2;
 my $verbose;
 
 GetOptions("o=s" => \$opfn,"i=f"=>\$DeltaPSIcutoff,"f=f"=>\$FDR,"c1=i"=>\$compares1,"c2=i"=>\$compares2,"verbose"=>\$verbose)
-	or die("[-]Error in command line arguments\nConvert A3SS rMATS to EANMD input, GetA3SSinput v1.10 2023/02/06\nUsage: perl GetA3SSinput.pl [options] <input rmats A3SS result>\n
+	or die("[-]Error in command line arguments\nConvert A5SS rMATS to EANMD input, GetA5SSinput v1.10 2023/02/06\nUsage: perl GetA5SSinput.pl [options] <input rmats A5SS result>\n
   options:\n
-	 [-o output prefix. default: rMATS_filtered.out]\n
+	 [-o output prefix | default: rMATS_filtered.out]\n
      [-i float|delta PSI cutoff [0-1.0]. default: 0.15]\n
 	 [-f float|FDR cutoff [0-1.0]. default: 0.05]\n
 	 [-c1 int|The first sample numbers.  default: 2]\n
@@ -38,14 +38,14 @@ if ($opfn eq ""){
 }
 
 open OUT, "> $opfn.txt" or die ("[-] Error: Can't open or creat $opfn.txt\n");
-open OUTEAINPUT, "> $opfn.EANMD.input.txt" or die ("[-] Error: Can't open or creat $opfn.EANMD.input.txt\n");
-
 # print "Min depth of averge read counts: $mindepth\ndelta PSI cutoff: $DeltaPSIcutoff\nFDR cutoff: $FDR\nThe first sample numbers: $compares1\nThe second sample numbers: $compares2\n"; #Min count of inclusion events: $mincount\nThe US and DS fold change cutoff: $MXEfold\n";
 print "Delta PSI cutoff: $DeltaPSIcutoff\nFDR cutoff: $FDR\nThe first sample numbers: $compares1\nThe second sample numbers: $compares2\n"; #Min count of inclusion events: $mincount\nThe US and DS fold change cutoff: $MXEfold\n";
  
 # print OUT "ID\tGeneID\tgeneSymbol\tchr\tstrand\texonStart_0base\texonEnd\tupstreamES\tupstreamEE\tdownstreamES\tdownstreamEE\tID";
 print OUT "ID\tGeneID\tgeneSymbol\tchr\tstrand\tlongExonStart_0base\tlongExonEnd\tshortES\tshortEE\tflankingES\tflankingEE\tID";
 # longExonStart_0base	longExonEnd	shortES	shortEE	flankingES	flankingEE
+open OUTEAINPUT, "> $opfn.EANMD.input.txt" or die ("[-] Error: Can't open or creat $opfn.EANMD.input.txt\n");
+
 for (my $i=1;$i<=$compares1;$i++){
     print OUT "\tIJC_SAMPLE_1_$i";
 }
@@ -94,8 +94,6 @@ for (my $i=1;$i<=$compares2;$i++){
 # print OUT "\tMin_average_counts\tMinJCofInclusion\tUp_Down_JC_fold\n";
 print OUT "\n";
 
-
-
 our $count1 = 0;
 our $count2 = 0;
 LINE: while(our $row = <>){	
@@ -138,7 +136,7 @@ LINE: while(our $row = <>){
     my @SEcount = split(/,/,$col[25]); #individual SE Count.
     my @US2DS = split(/,/,$col[25]); #individual Up Stream to Down Stream Junction Count (Skipped Junction Count).
 
-    ### Start to filter
+### Start to filter
     ## 1. FDR cutoff $FDR.
 
     if ($tmpFDR > $FDR){
@@ -208,10 +206,12 @@ LINE: while(our $row = <>){
     print OUT "$res1\n";
     $tmpgeneSymbol =~ s/"//g; ### 2021-09-09 rm double quotes.
     $tmpGeneID =~ s/"//g;
-    ## A3SS 
     
-    my $A3SSES;
-    my $A3SSEE; 
+  
+    ## A5SS 
+    # ES: Exon Start; EE: Exon End.
+    my $A5SSES;
+    my $A5SSEE; 
 
     my $flankingES;
     my $flankingEE;
@@ -219,10 +219,19 @@ LINE: while(our $row = <>){
     my $shortES;
     my $shortEE;
 
-    if ($tmpstrand eq "+"){
+    if ($tmpstrand eq "+"){ #A5SS diff to A3SS; SE: Long; US: Short; DS: Flanking;
 
-        $A3SSES = $tmpSEstart;
-        $A3SSEE = $tmpUSstart;
+        # $A5SSES = $tmpSEstart;
+        # $A5SSEE = $tmpUSstart;
+
+        # $flankingES = $tmpDSstart;
+        # $flankingEE = $tmpDSend;
+
+        # $shortES = $tmpUSstart;
+        # $shortEE = $tmpUSend;
+
+        $A5SSES = $tmpUSend;
+        $A5SSEE = $tmpSEend;
 
         $flankingES = $tmpDSstart;
         $flankingEE = $tmpDSend;
@@ -232,8 +241,17 @@ LINE: while(our $row = <>){
     
     }else{
         
-        $A3SSES = $tmpUSend;
-        $A3SSEE = $tmpSEend;
+        # $A5SSES = $tmpUSend;
+        # $A5SSEE = $tmpSEend;
+
+        # $flankingES = $tmpUSstart;
+        # $flankingEE = $tmpUSend;
+
+        # $shortES = $tmpDSstart;
+        # $shortEE = $tmpDSend;
+
+        $A5SSES = $tmpSEstart;
+        $A5SSEE = $tmpUSstart;
 
         $flankingES = $tmpUSstart;
         $flankingEE = $tmpUSend;
@@ -242,7 +260,8 @@ LINE: while(our $row = <>){
         $shortEE = $tmpDSend;
     }
     # print OUTEAINPUT "$tmpgeneSymbol\t$tmpchr:$tmpSEstart:$tmpSEend:$tmpstrand"."@"."$tmpchr:$tmpUSstart:$tmpUSend:$tmpstrand"."@"."$tmpchr:$tmpDSstart:$tmpDSend:$tmpstrand\t$tmpGeneID\n";
-    print OUTEAINPUT "$tmpgeneSymbol\t$tmpchr:$A3SSES:$A3SSEE:$tmpstrand"."@"."$tmpchr:$flankingES:$flankingEE:$tmpstrand"."@"."$tmpchr:$shortES:$shortEE:$tmpstrand\t$tmpGeneID\n";
+    # print OUTEAINPUT "$tmpgeneSymbol\t$tmpchr:$A5SSES:$A5SSEE:$tmpstrand"."@"."$tmpchr:$flankingES:$flankingEE:$tmpstrand"."@"."$tmpchr:$shortES:$shortEE:$tmpstrand\t$tmpGeneID\n";
+    print OUTEAINPUT "$tmpgeneSymbol\t$tmpchr:$A5SSES:$A5SSEE:$tmpstrand"."@"."$tmpchr:$shortES:$shortEE:$tmpstrand"."@"."$tmpchr:$flankingES:$flankingEE:$tmpstrand\t$tmpGeneID\n";
 	
   
 
