@@ -2,8 +2,8 @@
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount.R v1.20
-##### Written by Kaining Hu 2022-10-02
+###### EANMDflagcount.R v1.30
+##### Written by Kaining Hu 2023-02-22
 library(getopt)
 
 spec <- matrix(
@@ -71,13 +71,13 @@ write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
   for (i in 1:mallnrow) {
     if (!is.null(mall$Start_codon[i]) && mall$Start_codon[i] > 0) {    ### 2021-10-20 Start codon as 1st order.
       mall$Finalflag[i] = "Start_codon"
-    }else if(mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0) {
+    }else if(!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0) {
       mall$Finalflag[i] = "NMD_ex_in"
-    }else if (mall$NMD_ex[i] == 0 && mall$NMD_in[i] > 0) {
+    }else if ( !is.null(mall$NMD_in[i]) && mall$NMD_in[i] > 0 && (is.null(mall$NMD_ex[i])|| mall$NMD_ex[i] == 0) ) {
       mall$Finalflag[i] = "NMD_in"
-    }else if (mall$NMD_ex[i]>0 && mall$NMD_in[i] == 0) {
+    }else if (!is.null(mall$NMD_ex[i]) && mall$NMD_ex[i]>0 && (mall$NMD_in[i] == 0 || is.null(mall$NMD_in[i]))) {
       mall$Finalflag[i] = "NMD_ex"
-    }else if (mall$X5UTR[i] > 0) {
+    }else if (!is.null(mall$X5UTR[i]) && mall$X5UTR[i] > 0) {
       mall$Finalflag[i] = "5UTR"
     }else if ((mall$Upstream.stop_codon[i] + mall$Downstream.stop_codon[i])>0) {
       mall$Finalflag[i] = "ORF_changing"
@@ -89,7 +89,7 @@ write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
       mall$Finalflag[i] = "Same_stop_codon_diff_from_annot"
     # }else if(mall$Stop_codon[i]>0){
     #   mall$Finalflag[i]="Stop_codon"
-    }else if(mall$X3UTR[i]>0){
+    }else if(!is.null(mall$X3UTR[i]) && mall$X3UTR[i]>0){
       mall$Finalflag[i] = "3UTR"
     # }else if(mall$Same.stop_codon[i]>0){
     #   mall$Finalflag[i]="Same.stop_codon" 
