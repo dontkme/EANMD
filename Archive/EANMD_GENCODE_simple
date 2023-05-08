@@ -1,8 +1,8 @@
 ﻿#!/usr/bin/env perl
 
 #AUTHORS
-# Kaining Hu (c) 2023
-# Get NMD transid from GTF and genome EANMD (GENCODE and loose version)v1.42 2023/02/13
+# Kaining Hu (c) 2021
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.350 2021/07/06
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Loose coordinate version) v1.42 2023/02/13.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version)v1.350 2021/07/06.\n");
 
 ###################sub TRseq##########
  
@@ -139,7 +139,7 @@ print "=========================================================================
 
 
 our $starttime=time();
-print "Running. Please wait for a minute.\n";
+print "Running. Please wait for a minite.\n";
 
 ################sub get sequence########
 
@@ -192,8 +192,7 @@ print "Feature: $feature\n";
 
 
 
-while(defined (my $inrow=<ANNOT>)){    ### Get CDS/Coding gene transcripts id.
-    if ($inrow =~ m/^\#+/) {next;}
+while(defined (our $inrow=<ANNOT>)){    ### Get CDS/Coding gene transcripts id.
     @tmp=();
     @tmp = split (/\t/,$inrow);
 
@@ -227,10 +226,9 @@ while(defined(our $inrow = <ANNOT>)){
     @tmp=();
 
     if ($inrow =~ m/^\#+/) {next;}
-    # if ($annotcount > 1 and $annotcount % 100000 == 0){
-    # if ($annotcount > 1 and $annotcount % 100000 == 0 ){
-    #     print "Deal with $annotcount annotations.\n";
-    # }
+    if ($annotcount > 1 and $annotcount % 100000 == 0){
+        print "Deal with $annotcount annotations.\n";
+    }
     
             @tmp = split (/\t/,$inrow);
             
@@ -279,14 +277,9 @@ while(defined(our $inrow = <ANNOT>)){
 
             our $key1 = "$transcript_id.$gene_id.$annottype.exon.$exon_numberf3";
             # our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos..$seqendpos:$plusminus";
-            our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos-$seqendpos:$plusminus.$seqlen";   #### Key format.!!!
+            our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos-$seqendpos:$plusminus.$seqlen";
             $annotcount++;
-            
-            if ($annotcount > 1 and $annotcount % 100000 == 0 ){
-                print "Deal with $annotcount annotations.\n";  ###print counts. 2021-07-06
-            }
             # print "$key\n";
-
             $key2Chr{$key}=$seqchrid;
             $key2type{$key}=$annottype;
             $key2startpos{$key}=$seqstartpos;
@@ -330,7 +323,7 @@ print "Finished loading GTF. Loaded $annotcount annotations.\n";
 
 
 close ANNOT;
-# print "All done. Dealt with $annotcount annotations.\n";
+print "All done. Dealed with $annotcount annotations.\n";
 
 # while ((my $key, my $value) = each %key2PM){  
 # print "$key => $value\n";  
@@ -605,9 +598,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
         # if ($inputline > 1 and $annotcount % 1000 == 0){
         #         print "Dealed with $annotcount annotations.\n";
         #     }
-        #  $inputline =~ s/\r\n// ; # remove \n 2021-09-09
-         $inputline =~ s/\R//g ; # remove \n 2021-09-26
-        # chomp($inputline);
+        $inputline =~ s/\r\n// ;
 
         my @tmp = split (/\t/,$inputline);
 
@@ -653,8 +644,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
             
 
         foreach my $keypos1(@sortkey){
-            # if ($keypos1 =~ m/$USpos/){
-            if ($keypos1 =~ m/$SEchr\:.*-$USendpos\:$SEPM/){ ### 2023.02.13.loose version
+            if ($keypos1 =~ m/$USpos/){
                 # say $keypos1;
                     my $tmptransid = $key2transid{$keypos1};                
                     push(@pos1, $tmptransid);
@@ -668,9 +658,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
         # }
         # my @DSposlist   = tied(%key2transid)->FETCH($DSpos);
         foreach my $keypos2(@sortkey){
-            # if ($keypos2 =~ m/$DSpos/){
-            if ($keypos2 =~ m/$SEchr\:$DSstartpos-.*\:$SEPM/){ ### 2023.02.13.loose version
-                
+            if ($keypos2 =~ m/$DSpos/){
                 my $tmptransid = $key2transid{$keypos2};
                     push(@pos2, $tmptransid);
             }
@@ -778,52 +766,6 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
             # my $setransexonid = $SEexonid{$tmptransid};
             my $transexonnumbers = $trans_exonnumbers{$tmptransid}; # Transcript total exon numbers. !!! Important 
             my $transPM = $trans_PM{$tmptransid};
-            ########## 2021-10-18 get US DS exon number.
-            # my $SEtransexonumber = 0;
-            my $UStransexonnumber = 0;
-            my $DStransexonnumber = 0;
-            my $innerExonsofUSandDS = 0;
-            # $SEseq
-            # Get US and US exon number.
-            foreach my $exonkey(@tmpexonkeys){  #search this transcript's exon keys.
-                # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){ ### 2023.02.13 Loose version
-                    # say $SEkey;
-                    # $setransexonid=$key2exonnumber{$SEkey};
-                    $UStransexonnumber = $key2exonnumber{$exonkey};
-                    # say $setransexonid;
-
-                }
-
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ ### 2023.02.13 Loose version
-                    $DStransexonnumber = $key2exonnumber{$exonkey};
-                }
-
-            }
-
-            foreach my $exonkey(@tmpCDSkeys){  #search this transcript's CDS keys. avoid missing $DStransexonnumber, if it is a boundary of CDS and UTR. 2021/05/06
-                # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){ ### 2023.02.13 Loose version
-                    # say $SEkey;
-                    # $setransexonid=$key2exonnumber{$SEkey};
-                    $UStransexonnumber = $key2exonnumber{$exonkey};
-                    # say $setransexonid;
-
-                }
-
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ ### 2023.02.13 Loose version
-                    $DStransexonnumber = $key2exonnumber{$exonkey};
-                }
-
-            }
-
-             $innerExonsofUSandDS = abs($DStransexonnumber - $UStransexonnumber) -1;  #### 2021-07-06 GENCODE simple version.
-
-            ########################## 2021-10-18 get US DS exon number. End
 
             ###################### Start analysis
 
@@ -896,7 +838,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                 }
                 $originexonCDSseqsLen = length($originexonCDSseqs);
                 $originCDSexonseqsLen = length($originCDSexonseqs); #### ##### 1. report value.
-                my $originCDSexonRmLastexonseqLen = 0;  ####2. report value
+                our $originCDSexonRmLastexonseqLen = 0;  ####2. report value
                  
                 $originCDSexonRmLastexonseqLen = $originCDSexonseqsLen - length($exonseqs{$tmptransid}[$transexonnumbers]); ### Get penultimate CDS + exons seq length.
 
@@ -952,9 +894,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     for (1..27){
                         print OUTUSSEDSTRANSID "\t";
                     }
-                    print OUTUSSEDSTRANSID "\t\t";
-                    print OUTUSSEDSTRANSID "$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers. #2021-10-18 rm 1 \t.
-
+                    print OUTUSSEDSTRANSID "\t\t\n";
 
                 }elsif($setransexonid > $startcodon_exonnumber and $setransexonid < $stopcodon_exonnumber){ ######### SE was inner exon. start remove SE.
 
@@ -1174,24 +1114,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                         }
 
                     }elsif ($flag1 eq "ORF preserving"){
-
                         $flag4 = $flagOriginNMD;
                         $flagEx_inNMD = "No_info";
-
-                    }elsif ($flag1 eq "No stop_codon"){ ### 2022-02-02 add no_stop_codon tell NMD_in/ex
-
-                        $flag4 = "No stop_codon";
-                        # $flagEx_inNMD = "No_info";
-
-                        if ($flagOriginNMD eq "NMD"){
-                            
-                            $flagEx_inNMD = "NMD_in";
-                        
-                        }else{
-                            
-                            $flagEx_inNMD = "-";
-                            
-                        }
                     }
 
                     # if ($flagOriginNMD eq "NMD"){
@@ -1211,8 +1135,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\tInner_exon";
                     print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos";
-                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen"; #2021-10-18 add US DS exon numbers.
-                    print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
+                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen\n";
+                    
 
                 }elsif($setransexonid == $startcodon_exonnumber){ ########## SE had Start_Codon codition. Remove SE and predict longest ORF!!! 2021-04-21 ######
                     my $removeSEexonsseq = "";
@@ -1429,9 +1353,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     # print OUTUSSEDSTRANSID "\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\n"; #\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos\n";
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t-\t-\t-\t-";
                     # print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\n";
-                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t-\t-\t-\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t\t";
-                    print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
-
+                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t-\t-\t-\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t\t\n";
 
                 }elsif($setransexonid > $stopcodon_exonnumber){ #### SE in 3UTR
 
@@ -1585,9 +1507,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\t3UTR";
                     print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos";
-                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen";
-                    print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
-
+                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen\n";
                     # print OUTUSSEDSTRANSID "\t$flag1\n" # t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\n";
 
                 }elsif($setransexonid == $stopcodon_exonnumber){ ### SE Have stop_codon.  
@@ -1736,20 +1656,6 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                             }
                         }
 
-                    }elsif($flag1 eq "No stop_codon"){ #### 2023-02-02, add No stop_codon NMD_in/ex estimate.
-                        
-                        $flag4 = "No stop_codon";
-
-                        if ($flagOriginNMD eq "NMD"){
-                            
-                            $flagEx_inNMD = "NMD_in";
-                            
-                        }else{
-                            
-                            $flagEx_inNMD = "-";
-                            
-                        }
-
                     }
 
 
@@ -1757,9 +1663,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\tStop_codon";
                     print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos";
-                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen";
-                    print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
-
+                    print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen\n";
                     # print OUTUSSEDSTRANSID "\t$flag1\n"
                 }
 
@@ -1805,8 +1709,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
             # Get US and US exon number.
             foreach my $exonkey(@tmpexonkeys){  #search this transcript's exon keys.
                 # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){ 
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){  #### 2023.02.03 Loose version
+                if ($exonkey =~ m/$USpos/){
                     # say $SEkey;
                     # $setransexonid=$key2exonnumber{$SEkey};
                     $UStransexonnumber = $key2exonnumber{$exonkey};
@@ -1814,8 +1717,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                 }
 
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ #### 2023.02.03 Loose version
+                if($exonkey =~ m/$DSpos/){
                     $DStransexonnumber = $key2exonnumber{$exonkey};
                 }
 
@@ -1823,8 +1725,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
             foreach my $exonkey(@tmpCDSkeys){  #search this transcript's CDS keys. avoid missing $DStransexonnumber, if it is a boundary of CDS and UTR. 2021/05/06
                 # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){ 
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){ #### 2023.02.03 Loose version
+                if ($exonkey =~ m/$USpos/){
                     # say $SEkey;
                     # $setransexonid=$key2exonnumber{$SEkey};
                     $UStransexonnumber = $key2exonnumber{$exonkey};
@@ -1832,9 +1733,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                 }
 
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ #### 2023.02.03 Loose version
-
+                if($exonkey =~ m/$DSpos/){
                     $DStransexonnumber = $key2exonnumber{$exonkey};
                 }
 
@@ -1994,34 +1893,18 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                     my $originFullCDS="";
                     my $originFullCDSlen="";
-
                     for (my $tmpk =$startcodon_exonnumber; $tmpk <= $stopcodon_exonnumber; $tmpk ++){
                         $originFullCDS .= $CDSseqs{$tmptransid}[$tmpk];
 
                     }
                     $originFullCDSlen = length($originFullCDS);    #### original CDSs length.
 
-                    my $originCDSexonseqs="";
-                    my $originCDSexonseqsLen="";
-                    
-                    for (my $tmpz =$startcodon_exonnumber; $tmpz <= $transexonnumbers; $tmpz ++){
-                        if ($tmpz == $startcodon_exonnumber){
-                            $originCDSexonseqs .= $CDSseqs{$tmptransid}[$tmpz];  ### Bug fix $originCDSexonseqs 2021-10-06
-
-                        }else{
-                            $originCDSexonseqs .= $exonseqs{$tmptransid}[$tmpz];
-                        }
-
-                    }
-                    $originCDSexonseqsLen = length($originCDSexonseqs);    #### original CDSs length.
-
                     my $addedSEseqlen = length($SEseq);
                     my $originCDSlen = $tmpaccOriginCDSlen{$transexonnumbers};
                     my $addSECDSlen = $tmpaccAddCDSlen{$transexonnumbers};
 
                     my $originCDSexonRmLastexonseqLen =0;     ##### Tell Original CDS NMD signal $dj. 2021.05.06
-                    # $originCDSexonRmLastexonseqLen = $tmpaccOriginCDSlen{$transexonnumbers-1};
-                    $originCDSexonRmLastexonseqLen = $originCDSexonseqsLen - length($exonseqs{$tmptransid}[$transexonnumbers]);
+                    $originCDSexonRmLastexonseqLen = $tmpaccOriginCDSlen{$transexonnumbers-1};
                     my $originCDSdj = 0;
                     $originCDSdj = $originCDSexonRmLastexonseqLen - ($originFullCDSlen + 3); ##### Bug fix +3 as a stop codon. 2021.06.02
                     my $flagOriginNMD ="-";
@@ -2165,21 +2048,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                         }
                     }
 
-                    if ($flag2 eq "No stop_codon"){ ### 2022-02-02 add no_stop_codon tell NMD_in/ex
-                        $flagnmd = "No stop_codon";
-                        # $flagEx_inNMD = "No_info";
-                        if ($flagOriginNMD eq "NMD"){
-                            
-                                $flagEx_inNMD = "NMD_ex";
-                            
-                        }else{
-                            
-                                $flagEx_inNMD = "-";
-                            
-                        }
-                    }
                     
-                    $originFullCDS =~ s/\R//g ; ### 2021-09-30 bug fix of $originFullCDS \n.
+                    
 
                     print OUTUSDSTRANSID "$inputline\t$tmptransid\t$transPM\t$transexonnumbers\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\t$SEtransexonumber\t$startcodon_exonnumber\t$stopcodon_exonnumber";
                     print OUTUSDSTRANSID "\t$flag1\t$addedSEseqlen\t$originFullCDSlen\t$originCDSlen\t$addSECDSlen\t$SEseq\t$originFullCDS\t$tmpOriginCDS\t$tmpAddCDS";
@@ -2268,18 +2138,15 @@ say "Finished predicting. Start to combine results.";
 
 open USSEDSRES, "< $opfn.outUSSEDStransid.txt" or die ("[-] Error: Can't open $opfn.outUSSEDStransid.txt\n");
 open USDSRES, "< $opfn.outUSDStransid.txt" or die ("[-] Error: Can't open $opfn.outUSDStransid.txt\n");
-open COMBINEDOUT, "> $opfn.outCombined.txt" or die ("[-] Error: Can't open or create $opfn.outCombined.txt\n");
-print COMBINEDOUT "QueryCol1\tSEUSDSCoordinates\tQueryCol3\tTranscript_id\tStrand\tExons\tStart_exon\tStop_exon\tSE_exon_Number\tSE(US)_Pos\tSE_length\tOri_CDS_length\tOri_Star_codon_to_exon_end_seq_len\trm/add_SE_start_to_end_seq_len";
+open COMBINEDOUT, "> $opfn.outCombined.txt" or die ("[-] Error: Can't open or creat $opfn.outCombined.txt\n");
+print COMBINEDOUT "#QueryCol1\tSEUSDSCoordinates\tQueryCol3\tTranscript_id\tStrand\tExons\tStart_exon\tStop_exon\tSE_exon_Number\tSE(US)_Pos\tSE_length\tOri_CDS_length\tOri_Star_codon_to_exon_end_seq_len\trm/add_SE_start_to_end_seq_len";
 print COMBINEDOUT "\tSEseq\tOri_CDSexons_seq\trm/add_SE_CDSexons_seq\tOri_last_junction_pos\tOri_last_dj\tOri_NMD\tStart_codon\tOri_AA\trm/add_SE_AA";
-print COMBINEDOUT "\tAA_len+1\tOri_AA_1st_stop_pos\tOri_AA_stop_pos\tSEed_AA_1st_stop_pos\tSEed_AA_stop_pos\tFrame_shift_flag\tNew_1st_stop_pos_dj\tNMD_flag\tNMD_in/ex_flag\tsource\tSEupstreamCDS\tSEupstreamAApos";
-print COMBINEDOUT "\tUStransexonnumber\tDStransexonnumber\tinnerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
-
+print COMBINEDOUT "\tAA_len+1\tOri_AA_1st_stop_pos\tOri_AA_stop_pos\tSEed_AA_1st_stop_pos\tSEed_AA_stop_pos\tFrame_shift_flag\tNew_1st_stop_pos_dj\tNMD_flag\tNMD_in/ex_flag\tsource\tSEupstreamCDS\tSEupstreamAApos\n";
 
 while (my $rmSEres=<USSEDSRES>){
-    # $rmSEres =~ s/\R//g; #2021-10-18 remove \n
     my @tmprmSEres = split("\t",$rmSEres);
     print COMBINEDOUT "$tmprmSEres[0]";
-    my @rmSEcolumn =(1..4,6..8,5,9,13,18,20,19,10,16,17,21..24,25..26,27..32,39,40); 
+    my @rmSEcolumn =(1..4,6..8,5,9,13,18,20,19,10,16,17,21..24,25..26,27..32,39,40);
     for my $i (@rmSEcolumn){
         # say $i;
         if ($i== 27){
@@ -2307,15 +2174,14 @@ while (my $rmSEres=<USSEDSRES>){
         # say $tmpSEupsteramCDSAALen;
     }
 
-    print COMBINEDOUT "\t$tmpNMDinexflag\tUSSEDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmprmSEres[44]\t$tmprmSEres[45]\t$tmprmSEres[46]";#2021-10-18 add 44..46
+    print COMBINEDOUT "\t$tmpNMDinexflag\tUSSEDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\n";
 
 }
 
 while (my $addSEres=<USDSRES>){
-    # $addSEres =~ s/\R//g; #2021-10-18 remove \n
     my @tmpaddSEres = split("\t",$addSEres);
     print COMBINEDOUT "$tmpaddSEres[0]";
-    my @addSEcolumn =(1..5,10,11,9,12..18,20,21..24,25,27,29..34,37,40); #2021-10-18 add 6..8
+    my @addSEcolumn =(1..5,10,11,9,12..18,20,21..24,25,27,29..34,37,40);
     for my $i (@addSEcolumn){
         # say $i;
         
@@ -2331,7 +2197,7 @@ while (my $addSEres=<USDSRES>){
     unless($tmpSEupsteramCDSAALen eq ""){
         $tmpSEupsteramCDSAALen=sprintf("%.1f", $tmpSEupsteramCDSAALen);
     }
-    print COMBINEDOUT "\t$tmpNMDinexflag\tUSDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmpaddSEres[6]\t$tmpaddSEres[7]\t$tmpaddSEres[8]\n";
+    print COMBINEDOUT "\t$tmpNMDinexflag\tUSDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\n";
 
 }
 
@@ -2347,6 +2213,6 @@ close COMBINEDOUT;
 our $endtime=time();
 #say $starttime;
 #say $endtime;
-printf "All done! %g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
+printf "Done! %g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
 
 

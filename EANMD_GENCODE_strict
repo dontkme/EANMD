@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2023
-# Get NMD transid from GTF and genome EANMD (GENCODE and loose version)v1.42 2023/02/13
+# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.41 2023/02/02
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation.default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Loose coordinate version) v1.42 2023/02/13.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Multiple Threads version) v1.41 2023/02/02.\n");
 
 ###################sub TRseq##########
  
@@ -279,7 +279,7 @@ while(defined(our $inrow = <ANNOT>)){
 
             our $key1 = "$transcript_id.$gene_id.$annottype.exon.$exon_numberf3";
             # our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos..$seqendpos:$plusminus";
-            our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos-$seqendpos:$plusminus.$seqlen";   #### Key format.!!!
+            our $key = "$transcript_id.$gene_id.$annottype.ex.$exon_numberf3.$seqchrid:$seqstartpos-$seqendpos:$plusminus.$seqlen";
             $annotcount++;
             
             if ($annotcount > 1 and $annotcount % 100000 == 0 ){
@@ -653,8 +653,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
             
 
         foreach my $keypos1(@sortkey){
-            # if ($keypos1 =~ m/$USpos/){
-            if ($keypos1 =~ m/$SEchr\:.*-$USendpos\:$SEPM/){ ### 2023.02.13.loose version
+            if ($keypos1 =~ m/$USpos/){
                 # say $keypos1;
                     my $tmptransid = $key2transid{$keypos1};                
                     push(@pos1, $tmptransid);
@@ -668,9 +667,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
         # }
         # my @DSposlist   = tied(%key2transid)->FETCH($DSpos);
         foreach my $keypos2(@sortkey){
-            # if ($keypos2 =~ m/$DSpos/){
-            if ($keypos2 =~ m/$SEchr\:$DSstartpos-.*\:$SEPM/){ ### 2023.02.13.loose version
-                
+            if ($keypos2 =~ m/$DSpos/){
                 my $tmptransid = $key2transid{$keypos2};
                     push(@pos2, $tmptransid);
             }
@@ -787,8 +784,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
             # Get US and US exon number.
             foreach my $exonkey(@tmpexonkeys){  #search this transcript's exon keys.
                 # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){ ### 2023.02.13 Loose version
+                if ($exonkey =~ m/$USpos/){
                     # say $SEkey;
                     # $setransexonid=$key2exonnumber{$SEkey};
                     $UStransexonnumber = $key2exonnumber{$exonkey};
@@ -796,8 +792,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                 }
 
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ ### 2023.02.13 Loose version
+                if($exonkey =~ m/$DSpos/){
                     $DStransexonnumber = $key2exonnumber{$exonkey};
                 }
 
@@ -805,8 +800,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
             foreach my $exonkey(@tmpCDSkeys){  #search this transcript's CDS keys. avoid missing $DStransexonnumber, if it is a boundary of CDS and UTR. 2021/05/06
                 # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){ ### 2023.02.13 Loose version
+                if ($exonkey =~ m/$USpos/){
                     # say $SEkey;
                     # $setransexonid=$key2exonnumber{$SEkey};
                     $UStransexonnumber = $key2exonnumber{$exonkey};
@@ -814,8 +808,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                 }
 
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ ### 2023.02.13 Loose version
+                if($exonkey =~ m/$DSpos/){
                     $DStransexonnumber = $key2exonnumber{$exonkey};
                 }
 
@@ -1805,8 +1798,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
             # Get US and US exon number.
             foreach my $exonkey(@tmpexonkeys){  #search this transcript's exon keys.
                 # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){ 
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){  #### 2023.02.03 Loose version
+                if ($exonkey =~ m/$USpos/){
                     # say $SEkey;
                     # $setransexonid=$key2exonnumber{$SEkey};
                     $UStransexonnumber = $key2exonnumber{$exonkey};
@@ -1814,8 +1806,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                 }
 
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ #### 2023.02.03 Loose version
+                if($exonkey =~ m/$DSpos/){
                     $DStransexonnumber = $key2exonnumber{$exonkey};
                 }
 
@@ -1823,8 +1814,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
             foreach my $exonkey(@tmpCDSkeys){  #search this transcript's CDS keys. avoid missing $DStransexonnumber, if it is a boundary of CDS and UTR. 2021/05/06
                 # say $SEpos;
-                # if ($exonkey =~ m/$USpos/){ 
-                if ($exonkey =~ m/$tmptransid.*$SEchr\:.*-$USendpos\:$SEPM/){ #### 2023.02.03 Loose version
+                if ($exonkey =~ m/$USpos/){
                     # say $SEkey;
                     # $setransexonid=$key2exonnumber{$SEkey};
                     $UStransexonnumber = $key2exonnumber{$exonkey};
@@ -1832,9 +1822,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                 }
 
-                # if($exonkey =~ m/$DSpos/){
-                if($exonkey =~ m/$tmptransid.*$SEchr\:$DSstartpos-.*\:$SEPM/){ #### 2023.02.03 Loose version
-
+                if($exonkey =~ m/$DSpos/){
                     $DStransexonnumber = $key2exonnumber{$exonkey};
                 }
 
