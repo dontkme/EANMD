@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #AUTHORS
-# Kaining Hu (c) 2022
+# Kaining Hu (c) 2023
 # Filter EANMD A3SS outCombined file v1.0 2023/02/07
 # hukaining@gmail.com
 

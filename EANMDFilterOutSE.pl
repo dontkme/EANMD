@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 
 #AUTHORS
-# Kaining Hu (c) 2023
-# Filter EANMD A5SS outCombined file v1.0 2023/02/07
+# Kaining Hu (c) 2022
+# Filter EANMD SE outCombined file v1.21 2022/01/16
 # hukaining@gmail.com
 
 use strict;
@@ -21,11 +21,11 @@ our $startcodon="ATG";
 #or die("Error in command line arguments\n perl Searchhelitron -o <outputfile> (inputfile)\n");
 GetOptions("o=s" => \$opfn, "s=s"=>\$startcodon, "verbose"  => \$verbose)
 or die("[-]Error in command line arguments
-  Usage: perl EANMDFilterOutA5SS.pl [options]  <input EANMD A5SS outCombined file>
+  Usage: perl EANMDFilterOut.pl [options]  <input EANMD outCombined file>
     options:
     [-o string|outprefix Default: filteredOut]
     [-s string|Start_codon to remain. default: \"ATG\"]
-    Note: Filter the records in EANMD A5SS outCombined file by start codon, #IR, CDS length #and Last Exon. v1.00 2023/02/07.\n");
+    Note: Filter the records in EANMD outCombined file by start codon, MXE and CDS length. v1.21 2022/01/16.\n");
 
 
 if (not @ARGV) {
@@ -44,10 +44,6 @@ our $count2=0;
 while(defined(our $line = <>)){
     $count1++;
 	my @tmp=split("\t",$line);
-    #### A3SS telling need value
-    my $exons=$tmp[5];
-    my $DSexonNo=$tmp[36]; 
-    #### A3SS need End
     my $Pos=$tmp[9];
     my $Start_codon=$tmp[20];
     my $source=$tmp[32];
@@ -57,14 +53,12 @@ while(defined(our $line = <>)){
         $inUSDSexonnumbers =~ s/\R//g;
     if ($Pos ne "5UTR" && $Start_codon !~ m/$startcodon/ig){ ### Rule ###2021.12.09 add i
         next;
-    # }elsif($Pos ne "5UTR" && $source eq "USSEDS" && $inUSDSexonnumbers >1){
-    #     next;
-    # }elsif($Pos ne "5UTR" && $source eq "USDS" && $inUSDSexonnumbers >0){  ### IR in A5SS no need?
-    #     next;
+    }elsif($Pos ne "5UTR" && $source eq "USSEDS" && $inUSDSexonnumbers >1){
+        next;
+    }elsif($Pos ne "5UTR" && $source eq "USDS" && $inUSDSexonnumbers >0){
+        next;
     }elsif($Pos ne "5UTR" && $Pos ne "Start_codon" && $Pos ne "3UTR"&& $Pos ne "Stop_codon" && $oriAAlen ne '-' && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.16.
         next;
-    # }elsif($Pos ne "3UTR" && $exons eq $DSexonNo){ #### A3SS telling
-    #     next;
     }else{
         $count2++;
         print OUT "$line";
