@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2023
-# Get NMD transid from GTF and genome EANMD (GENCODE version)v1.41 2023/02/02
+# Get NMD transid from GTF and genome EANMD (GENCODE Strict version)v1.41 2023/02/02
 # hukaining@gmail.com
 
 use strict;
