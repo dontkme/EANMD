@@ -34,7 +34,7 @@ our $dj = 50;
 GetOptions("o=s" => \$opfn, "p=i"=>\$MAX_processes, "d=i"=>\$dj, "g=s"=>\$annot,"f=s"=>\$feature,"s=s"=>\$sortID, "input|in=s"=>\$inputlist,"verbose"  => \$verbose)
 or die("[-]Error in command line arguments
   Usage: perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input rMATs type list> <input FASTA file(s)>
-    options:
+    Options:
     [-o string|Output prefix. Default: getseqsOut]
     [-p int |Threads number. Default: 1]
     [-d int |Distance to the last exon-exon junction. Default: 50]
