@@ -1,0 +1,334 @@
+﻿#!/usr/bin/env perl
+
+#AUTHORS
+# Kaining Hu (c) 2023
+# Sequence Motif counts v1.000 2023/10/30
+# hukaining@gmail.com
+
+use strict;
+use warnings;
+use 5.010;
+use Getopt::Long;
+use Pod::Usage;
+use Time::HiRes 'time';
+
+
+our $opfn="MC.out";
+my $verbose;
+
+our $inputlist="";
+our $grouptag="RbpMotif";
+our $headbp=-1;
+our $tailbp=-1;
+
+
+#GetOptions("i=s"=>\$seqfilename,"o=s" => \$opfn,"verbose"=>\$verbose)
+#or die("Error in command line arguments\n perl Searchhelitron -o <outputfile> (inputfile)\n");
+GetOptions("o=s" => \$opfn, "f=s" => \$grouptag,"input|in=s"=>\$inputlist, "H=i"=>\$headbp,"T=i"=>\$tailbp,"verbose"  => \$verbose)
+or die("[-]Error in command line arguments
+  Usage: perl EANMD_SeqMotifCounts [options] -in <string|input motif list, 'Name.Pattern'> <input FASTA file(s)>
+    Options:
+    [-o string|Output prefix. Default: MC.out]
+    [-f string|Custom group flag. Default: 'RbpMotif']
+    [-H int|head, seclet 5' (int) bp for analysis. Default: -1, (<0 could trun off the function), exculsive with -T]
+    [-T int|tail, seclet 3' (int) bp for analysis. Default: -1, (<0 could trun off the function), exculsive with -T]
+	 
+    Note: Sequence Motif counts v1.000 2023/10/30\n");
+
+ if ($headbp >0 and $tailbp >0){
+    die("-H $headbp and -T $tailbp are exclusive options")
+ }
+###################sub TRseq##########
+
+
+sub TRseq($)
+{
+	my ($pinseq) = @_;
+	#say $pinseq;
+	my $pinseqtr = reverse $pinseq;
+	#say $pinseqtr;
+	 $pinseqtr =~ tr/ACGTacgt/TGCAtgca/;
+	 #say $pinseqtr;
+	 return  $pinseqtr;
+}
+##################TRseq End#############
+########################################
+
+
+
+
+
+
+################
+# Loading Genome.
+################
+if (not @ARGV) {
+	die ("[-] Error: Not find a input Genome FASTA file.\n");
+}
+our $loadingstarttime=time();
+# print @ARGV;
+# if (@ARGV eq "") {
+#     die ("[-] Error: Not find a input genome FASTA file.\n");
+#     }
+print "Start loading analyzed sequence file(s): @ARGV \n";
+
+our $Chri=0;
+our @Chrname=();
+our @Chrseq=();
+our %Chrid2seq;
+#@ARGV = qw#''  Not_Find_a_File#;
+#say @ARGV;
+#say $0;
+while(defined(our $seq = <>)){
+
+	if ($seq =~ m/^.*>/) {
+	# $seq=~ m/^.*>([a-zA-Z0-9_.-]+) ?.*/;
+        $seq=~ m/^\s*>\s*(\S+)\s*(.*)/;
+        print "$1\n";
+        $Chrname[$Chri]= $1;
+        $Chri++;
+	}else{
+		$seq =~ s/\s//;
+		$seq =~ tr/MRWSYKVHDBmrwsykvhdb/CGTGCGGCGGCGTGCGGCGG/;#1.31add snp replace
+	    $Chrseq[$Chri-1] .=$seq;
+    #  $Chrid2seq{$Chrname[$Chri-1]} .=$seq;
+		}
+}
+
+    # for (our $i=0;$i<$Chri-1;$i++){
+    #     $Chrid2seq{$Chrname[$i]}=$Chrseq[$i];
+    # }
+
+#close SEQFILENAME;
+our $loadingendtime=time();
+print "$Chri Sequences\n";
+print "Finished loading!\n";
+printf "%g Sec %g Min\n",$loadingendtime-$loadingstarttime,($loadingendtime-$loadingstarttime)/60;
+print "====================================================================================\n";
+
+
+
+
+### Sub functions
+################sub get sequence########
+
+sub getseq
+{
+    my $sortkey= $_[0];
+    my $finalseq="";
+    my $seqchrid=$_[1];
+    my $seqstartpos=$_[2];;
+    my $seqendpos=$_[3];;
+
+    if ($_[4] eq "+"){
+            
+            # my $finalseq="";
+            $finalseq= substr($Chrid2seq{$seqchrid},$seqstartpos-1,$seqendpos-$seqstartpos+1);
+            # print OUT ">$faheadid"." $seqchrid:$seqstartpos..$seqendpos $plusminus\n";
+            # print OUT ">$sortkey\n";
+            # print OUT "$finalseq\n";
+
+        }elsif($_[4] eq "-"){
+               
+                # my $finalseq="";
+                $finalseq= TRseq(substr($Chrid2seq{$seqchrid},$seqstartpos-1,$seqendpos-$seqstartpos+1)); ##2021-07-06 GENCODE version.
+                # print OUT ">$faheadid"." $seqchrid:$seqstartpos..$seqendpos $plusminus\n";
+                # print OUT ">$sortkey\n";
+                # print OUT "$finalseq\n";
+
+        }
+        return $finalseq;
+}
+
+
+
+### sub functions End
+
+
+####################Output files###########
+
+open INPUTLIST, "< $inputlist" or die ("[-] Error: Can't open list file: $inputlist.\n");
+# open OUTTRANSIDALL, "> $opfn.outtransid.txt" or die ("[-] Error: Can't open or create $opfn.outtransid.txt\n");
+# open OUTSETRANSIDALL, "> $opfn.outSEtransid.txt" or die ("[-] Error: Can't open or create $opfn.outSEtransid.txt\n");
+# open OUTUSTRANSIDALL, "> $opfn.outUStransid.txt" or die ("[-] Error: Can't open or create $opfn.outUStransid.txt\n");
+# open OUTDSTRANSIDALL, "> $opfn.outDStransid.txt" or die ("[-] Error: Can't open or create $opfn.outDStransid.txt\n");
+# open OUTUSDSTRANSIDALL, "> $opfn.outUSDStransid.txt" or die ("[-] Error: Can't open or create $opfn.outUSDStransid.txt\n");
+# open OUTUSSEDSTRANSIDALL, "> $opfn.outUSSEDStransid.txt" or die ("[-] Error: Can't open or create $opfn.outUSSEDStransid.txt\n");
+
+open OUTMOTIFCOUNTS, "> $opfn.SeqMC.txt" or die ("[-] Error: Can't open or create $opfn.SeqMC.txt\n");
+# my $simpleheader=join("\t", "AS_events", 'Group_tag', "SEID", "SEseq", "SElength", "SEGC", 
+#             'USID',"USseq", 'USLen', 'USGC', 
+#             'DSID','DSseq', 'DSLen', 'DSGC', 
+#             'USIID', 'USILen', 'USIGC',
+#             'DSIID', 'DSILen', 'DSIGC', 
+#             'USI_SS5ID', 'USI_SS5seq', 'USI_SS5score', 'USI_SS3ID', 'USI_SS3seq', 'USI_SS3score',
+#             'DSI_SS5ID', 'DSI_SS5seq', 'DSI_SS5score', 'DSI_SS3ID', 'DSI_SS3seq', 'DSI_SS3score');
+
+
+
+####################Output files End###########
+
+
+### Main ####
+
+our $starttime=time();
+print "Running. Please wait for a minute.\n";
+print "Motif list: $inputlist\n";
+print "Output file prefix: $opfn\n";
+print "Group flag: $grouptag\n\n";
+
+##### Loading Motif list.
+
+our $count1=0;
+
+    # while(defined(our $inputline = <INPUTLISTP>)){
+our @MotifList=();
+our @MotifRE=();
+while(defined(our $inputline = <INPUTLIST>)){
+    chomp $inputline;
+    if ($inputline =~ m/^\#/) {next;}
+    if ($inputline !~ m/\./g) {next;}
+    $inputline =~ s/\R//g; # remove \n 2021-09-26
+    push (@MotifList, $inputline);
+    $count1++;
+    # if ($inputline > 1 and $annotcount % 1000 == 0){
+    #         print "Dealed with $annotcount annotations.\n";
+    #     }
+    #  $inputline =~ s/\r\n// ; # remove \n 2021-09-09
+    # chomp($inputline);
+    ## Example AC149090.1_chrJH584304.1:58563:58835:-@chrJH584304.1:55111:55701:-@chrJH584304.1:59591:59667:-
+    ## Abi3bp_chr16:56594461:56594536:+@chr16:56592603:56592681:+@chr16:56642488:56642560:+
+
+    my @tmp = split (/\./,$inputline);
+
+    my $genename = $tmp[0];
+
+    push(@MotifRE, $tmp[1]);
+}
+my $simpleheader=join("\t", @MotifList);
+ 
+$simpleheader=join("\t", "InputSeq", "Group_tag", $simpleheader);
+print OUTMOTIFCOUNTS "$simpleheader\n";
+
+
+for (my $ni=0;$ni<$Chri;$ni++){
+    our $seqall = $Chrseq[$ni];
+    my $ChrID=$Chrname[$ni];
+
+    our $seqLen= length($seqall);
+    # our $headbp=200;
+    # our $tailbp=200;
+    if ($seqLen gt $headbp and $headbp gt 0 and $tailbp lt 0 ){
+
+        my @tmpmotifcount=();
+       for (my $nj=0; $nj<$count1; $nj++){
+            my $runseq=substr($seqall, 0, $headbp);
+            my $tmpmotifcounts=0;
+            my $tmpRE=$MotifRE[$nj];
+            while ($runseq=~ /$tmpRE/igc){
+                $tmpmotifcounts++;
+            }
+            push(@tmpmotifcount, $tmpmotifcounts);
+
+        }  
+            # say "1st";
+
+        my $finalprintline=join("\t", $ChrID, $grouptag, @tmpmotifcount);
+        print OUTMOTIFCOUNTS "$finalprintline\n";
+
+    }elsif($seqLen < $headbp and $headbp > 0 and $tailbp > 0 ){
+
+        my @tmpmotifcount=();
+       for (my $nj=0; $nj<$count1; $nj++){
+            my $runseq=$seqall;
+            my $tmpmotifcounts=0;
+            my $tmpRE=$MotifRE[$nj];
+            while ($runseq=~ /$tmpRE/igc){
+                $tmpmotifcounts++;
+            }
+            
+            push(@tmpmotifcount, $tmpmotifcounts);
+
+        }  
+        # say "2ed";
+        my $finalprintline=join("\t", $ChrID, $grouptag, @tmpmotifcount);
+        print OUTMOTIFCOUNTS "$finalprintline\n";
+
+    }elsif($seqLen > $tailbp and $headbp < 0 and $tailbp > 0 ){
+
+        my @tmpmotifcount=();
+       for (my $nj=0; $nj<$count1; $nj++){
+            my $runseq=substr($seqall,  -$tailbp);
+            # say length($runseq);
+            my $tmpmotifcounts=0;
+            my $tmpRE=$MotifRE[$nj];
+            while ($runseq=~ /$tmpRE/igc){
+                $tmpmotifcounts++;
+            }
+            # if (length($runseq) >250){
+            # say  $ChrID, $runseq, $tmpmotifcounts;
+            # }
+            # say  $ChrID, "\t",$runseq, "\t", $tmpRE,"\t",$tmpmotifcounts;
+
+            push(@tmpmotifcount, $tmpmotifcounts);
+
+        }  
+        # say "3rd";
+        my $finalprintline=join("\t", $ChrID, $grouptag, @tmpmotifcount);
+        print OUTMOTIFCOUNTS "$finalprintline\n";
+
+
+
+    }elsif($seqLen <= $tailbp and $headbp < 0 and $tailbp > 0 ){
+            # print "$seqLen\t$tailbp\t$headbp\t$tailbp\n";
+        my @tmpmotifcount=();
+       for (my $nj=0; $nj<$count1; $nj++){
+            my $runseq=$seqall;
+            my $tmpmotifcounts=0;
+            my $tmpRE=$MotifRE[$nj];
+            while ($runseq=~ /$tmpRE/igc){
+                $tmpmotifcounts++;
+            }
+            push(@tmpmotifcount, $tmpmotifcounts);
+
+        }  
+        # say "4th";
+        my $finalprintline=join("\t", $ChrID, $grouptag, @tmpmotifcount);
+        print OUTMOTIFCOUNTS "$finalprintline\n";
+    
+    }elsif( $headbp < 0 and $tailbp < 0 ){
+
+        my @tmpmotifcount=();
+       for (my $nj=0; $nj<$count1; $nj++){
+            my $runseq=$seqall;
+            my $tmpmotifcounts=0;
+            my $tmpRE=$MotifRE[$nj];
+            # say $tmpRE;
+            while ($runseq=~ /$tmpRE/igc){
+                $tmpmotifcounts++;
+            }
+          
+            push(@tmpmotifcount, $tmpmotifcounts);
+
+        }  
+        # say "5th";
+        my $finalprintline=join("\t", $ChrID, $grouptag, @tmpmotifcount);
+        print OUTMOTIFCOUNTS "$finalprintline\n";
+    
+    }
+    
+}
+
+
+close OUTMOTIFCOUNTS;
+close INPUTLIST;
+
+
+######################################
+# End  main
+######################################
+our $endtime=time();
+#say $starttime;
+#say $endtime;
+printf "All done! $count1 Motifs.\n%g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
+
