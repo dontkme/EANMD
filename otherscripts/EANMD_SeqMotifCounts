@@ -218,7 +218,7 @@ for (my $ni=0;$ni<$Chri;$ni++){
     our $seqLen= length($seqall);
     # our $headbp=200;
     # our $tailbp=200;
-    if ($seqLen gt $headbp and $headbp gt 0 and $tailbp lt 0 ){
+    if ($seqLen > $headbp and $headbp > 0 and $tailbp < 0 ){
 
         my @tmpmotifcount=();
        for (my $nj=0; $nj<$count1; $nj++){
@@ -236,7 +236,7 @@ for (my $ni=0;$ni<$Chri;$ni++){
         my $finalprintline=join("\t", $ChrID, $grouptag, @tmpmotifcount);
         print OUTMOTIFCOUNTS "$finalprintline\n";
 
-    }elsif($seqLen < $headbp and $headbp > 0 and $tailbp > 0 ){
+    }elsif($seqLen <= $headbp and $headbp > 0 and $tailbp < 0 ){
 
         my @tmpmotifcount=();
        for (my $nj=0; $nj<$count1; $nj++){
