@@ -1,0 +1,839 @@
+﻿#!/usr/bin/env perl
+
+#AUTHORS
+# Kaining Hu (c) 2023
+# AS_events sequence Analysis with RNAfold MFE v1.100 2023/11/09
+# hukaining@gmail.com
+
+use strict;
+use warnings;
+use 5.010;
+use Getopt::Long;
+use Pod::Usage;
+use Time::HiRes 'time';
+
+
+our $opfn="SeqAnalysis.Out";
+my $verbose;
+
+our $inputlist="";
+our $grouptag="AS";
+our $structureLen=50;
+
+
+#GetOptions("i=s"=>\$seqfilename,"o=s" => \$opfn,"verbose"=>\$verbose)
+#or die("Error in command line arguments\n perl Searchhelitron -o <outputfile> (inputfile)\n");
+GetOptions("o=s" => \$opfn, "t=s" => \$grouptag,"input|in=s"=>\$inputlist,"l=i" => \$structureLen,"verbose"  => \$verbose)
+or die("[-]Error in command line arguments
+  Usage: perl EANMD_SeqAnalysisMFE [options] -in <string|input AS_events list> <input genome FASTA file(s)>
+    Options:
+    [-o string|Output prefix. Default: getseqsOut]
+    [-l int|Length of head or tail sequence for minimum free energy (MFE) calculation]
+    [-t string|Custom group tag. Default: \"AS\"]
+	 
+    Note: AS_events sequence Analysis with RNAfold MFE v1.100 2023/11/09\n");
+
+###################sub TRseq##########
+ 
+
+
+sub TRseq($)
+{
+	my ($pinseq) = @_;
+	#say $pinseq;
+	my $pinseqtr = reverse $pinseq;
+	#say $pinseqtr;
+	 $pinseqtr =~ tr/ACGTacgt/TGCAtgca/;
+	 #say $pinseqtr;
+	 return  $pinseqtr;
+}
+##################TRseq End#############
+########################################
+
+
+
+
+
+
+################
+# Loading Genome.
+################
+if (not @ARGV) {
+	die ("[-] Error: Not find a input Genome FASTA file.\n");
+}
+if ($structureLen<0){
+    die ("[-] Error: -l structure length should >0 .\n");
+}else{
+
+
+
+}
+our $loadingstarttime=time();
+# print @ARGV;
+# if (@ARGV eq "") {
+#     die ("[-] Error: Not find a input genome FASTA file.\n");
+#     }
+print "Start loading genomeic sequence file(s): @ARGV \n";
+
+our $Chri=0;
+our @Chrname=();
+our @Chrseq=();
+our %Chrid2seq;
+#@ARGV = qw#''  Not_Find_a_File#;
+#say @ARGV;
+#say $0;
+while(defined(our $seq = <>)){
+
+	if ($seq =~ m/^.*>/) {
+	# $seq=~ m/^.*>([a-zA-Z0-9_.-]+) ?.*/;
+        $seq=~ m/^\s*>\s*(\S+)\s*(.*)/;
+        print "$1\n";
+        $Chrname[$Chri]= $1;
+        $Chri++;
+	}else{
+		$seq =~ s/\s//;
+		$seq =~ tr/MRWSYKVHDBmrwsykvhdb/CGTGCGGCGGCGTGCGGCGG/;#1.31add snp replace
+	    #$Chrseq[$Chri-1] .=$seq;
+     $Chrid2seq{$Chrname[$Chri-1]} .=$seq;
+		}
+}
+
+    # for (our $i=0;$i<$Chri-1;$i++){
+    #     $Chrid2seq{$Chrname[$i]}=$Chrseq[$i];
+    # }
+
+#close SEQFILENAME;
+our $loadingendtime=time();
+print "$Chri Sequences\n";
+print "Finished loading!\n";
+printf "%g Sec %g Min\n",$loadingendtime-$loadingstarttime,($loadingendtime-$loadingstarttime)/60;
+print "====================================================================================\n";
+
+
+
+
+### Sub functions
+################sub get sequence########
+
+sub getseq
+{
+    my $sortkey= $_[0];
+    my $finalseq="";
+    my $seqchrid=$_[1];
+    my $seqstartpos=$_[2];;
+    my $seqendpos=$_[3];;
+
+    if ($_[4] eq "+"){
+            
+            # my $finalseq="";
+            $finalseq= substr($Chrid2seq{$seqchrid},$seqstartpos-1,$seqendpos-$seqstartpos+1);
+            # print OUT ">$faheadid"." $seqchrid:$seqstartpos..$seqendpos $plusminus\n";
+            # print OUT ">$sortkey\n";
+            # print OUT "$finalseq\n";
+
+        }elsif($_[4] eq "-"){
+               
+                # my $finalseq="";
+                $finalseq= TRseq(substr($Chrid2seq{$seqchrid},$seqstartpos-1,$seqendpos-$seqstartpos+1)); ##2021-07-06 GENCODE version.
+                # print OUT ">$faheadid"." $seqchrid:$seqstartpos..$seqendpos $plusminus\n";
+                # print OUT ">$sortkey\n";
+                # print OUT "$finalseq\n";
+
+        }
+        return $finalseq;
+}
+
+########### Sub GC content%
+sub getGCcontent{
+
+    my $oneseq=$_[0];
+    # $oneseql=length($_[0]);
+    my $oneseql=length($oneseq);
+    my $countA = $oneseq=~ tr/A/A/;
+    my $countT = $oneseq=~ tr/T/T/;
+    my $countG = $oneseq=~ tr/G/G/;
+    my $countC = $oneseq=~ tr/C/C/;
+    my $countN = $oneseq=~ tr/N/N/;
+    my $countnN = $countA + $countT + $countG +$countC;
+    my $countAT=$countA+$countT;
+    my $countGC=$countG+$countC;
+
+    my $GCcontent =$countGC/$oneseql;
+    return $GCcontent;
+}
+
+
+##### Sub functions
+######################## condon2aa ############################
+
+my(%genetic_code) = (
+   
+    'TCA' => 'S',    # Serine
+    'TCC' => 'S',    # Serine
+    'TCG' => 'S',    # Serine
+    'TCT' => 'S',    # Serine
+    'TTC' => 'F',    # Phenylalanine
+    'TTT' => 'F',    # Phenylalanine
+    'TTA' => 'L',    # Leucine
+    'TTG' => 'L',    # Leucine
+    'TAC' => 'Y',    # Tyrosine
+    'TAT' => 'Y',    # Tyrosine
+    'TAA' => '_',    # Stop
+    'TAG' => '_',    # Stop
+    'TGC' => 'C',    # Cysteine
+    'TGT' => 'C',    # Cysteine
+    'TGA' => '_',    # Stop
+    'TGG' => 'W',    # Tryptophan
+    'CTA' => 'L',    # Leucine
+    'CTC' => 'L',    # Leucine
+    'CTG' => 'L',    # Leucine
+    'CTT' => 'L',    # Leucine
+    'CCA' => 'P',    # Proline
+    'CCC' => 'P',    # Proline
+    'CCG' => 'P',    # Proline
+    'CCT' => 'P',    # Proline
+    'CAC' => 'H',    # Histidine
+    'CAT' => 'H',    # Histidine
+    'CAA' => 'Q',    # Glutamine
+    'CAG' => 'Q',    # Glutamine
+    'CGA' => 'R',    # Arginine
+    'CGC' => 'R',    # Arginine
+    'CGG' => 'R',    # Arginine
+    'CGT' => 'R',    # Arginine
+    'ATA' => 'I',    # Isoleucine
+    'ATC' => 'I',    # Isoleucine
+    'ATT' => 'I',    # Isoleucine
+    'ATG' => 'M',    # Methionine
+    'ACA' => 'T',    # Threonine
+    'ACC' => 'T',    # Threonine
+    'ACG' => 'T',    # Threonine
+    'ACT' => 'T',    # Threonine
+    'AAC' => 'N',    # Asparagine
+    'AAT' => 'N',    # Asparagine
+    'AAA' => 'K',    # Lysine
+    'AAG' => 'K',    # Lysine
+    'AGC' => 'S',    # Serine
+    'AGT' => 'S',    # Serine
+    'AGA' => 'R',    # Arginine
+    'AGG' => 'R',    # Arginine
+    'GTA' => 'V',    # Valine
+    'GTC' => 'V',    # Valine
+    'GTG' => 'V',    # Valine
+    'GTT' => 'V',    # Valine
+    'GCA' => 'A',    # Alanine
+    'GCC' => 'A',    # Alanine
+    'GCG' => 'A',    # Alanine
+    'GCT' => 'A',    # Alanine
+    'GAC' => 'D',    # Aspartic Acid
+    'GAT' => 'D',    # Aspartic Acid
+    'GAA' => 'E',    # Glutamic Acid
+    'GAG' => 'E',    # Glutamic Acid
+    'GGA' => 'G',    # Glycine
+    'GGC' => 'G',    # Glycine
+    'GGG' => 'G',    # Glycine
+    'GGT' => 'G',    # Glycine
+    'A' => '1',      # Rest 1 nt
+    'T' => '1',
+    'G' => '1',
+    'C' => '1',
+    'AA' => '2',     # Rest 2 nt
+    'AT' => '2',
+    'AG' => '2',
+    'AC' => '2',
+    'TA' => '2',
+    'TT' => '2',
+    'TG' => '2',
+    'TC' => '2',
+    'GA' => '2',
+    'GT' => '2',
+    'GG' => '2',
+    'GC' => '2',
+    'CA' => '2',
+    'CT' => '2',
+    'CG' => '2',
+    'CC' => '2',
+
+);
+
+sub codon2aa {
+    my($codon) = @_;
+
+    $codon = uc $codon;
+ 
+    if(exists $genetic_code{$codon}) {
+        return $genetic_code{$codon};
+    }else{
+
+            # die "Bad codon '$codon'!!\n";
+            return "*";
+    }
+}
+
+sub seq2aa1st {
+
+    my $dna= $_[0];
+    my $protein1="";
+
+    # for(my $i=0; $i < (length($dna) - 2) ; $i += 3) {
+    for(my $i=0; $i < length($dna) ; $i += 3) {
+    my $codon = substr($dna,$i,3);
+        $protein1 .= codon2aa($codon);
+    
+    }
+     return $protein1;
+}
+
+sub seq2aa2ed {
+
+    my $dna= $_[0];
+    my $protein2="";
+
+    # for(my $i=1; $i < (length($dna) - 2) ; $i += 3) {
+    for(my $i=1; $i < length($dna) ; $i += 3) {
+    my $codon = substr($dna,$i,3);
+       $protein2 .= codon2aa($codon);
+    
+    }
+     return $protein2;
+}
+
+sub seq2aa3rd {
+
+    my $dna= $_[0];
+    my $protein3="";
+
+    # for(my $i=2; $i < (length($dna) - 2) ; $i += 3) {
+    for(my $i=2; $i < length($dna)  ; $i += 3) {
+    my $codon = substr($dna,$i,3);
+       $protein3 .= codon2aa($codon);
+    
+    }
+     return $protein3;
+}
+#
+####################### codon2aa ###############################
+
+#### score5 form http://hollywood.mit.edu/burgelab/maxent
+my %me2x5 = &makescorematrix('me2x5');
+my %seq = &makesequencematrix('splicemodels/splice5sequences');
+
+my %bgd;
+$bgd{'A'} = 0.27;
+$bgd{'C'} = 0.23;
+$bgd{'G'} = 0.23;
+$bgd{'T'} = 0.27; 
+
+sub makesequencematrix{
+    my $file = shift;
+    my %matrix;my $n=0;
+    open(SCOREF, $file) || die "Can't open $file!\n";
+    while(<SCOREF>) { 
+	chomp;
+	$_=~ s/\s//;
+	$matrix{$_} = $n;
+	$n++;
+    }
+    close(SCOREF);
+    return %matrix;
+}
+sub makescorematrix{
+    my $file = shift;
+    my %matrix;my $n=0;
+    open(SCOREF, $file) || die "Can't open $file!\n";
+    while(<SCOREF>) { 
+	chomp;
+	$_=~ s/\s//;
+	$matrix{$n} = $_;
+	$n++;
+    }
+    close(SCOREF);
+    return %matrix;
+}
+
+sub getrest{
+  my $seq = shift;
+  my @seqa = split(//,uc($seq));
+  return $seqa[0].$seqa[1].$seqa[2].$seqa[5].$seqa[6].$seqa[7].$seqa[8];
+}
+sub scoreconsensus{
+  my $seq = shift;
+  my @seqa = split(//,uc($seq));
+  my %bgd; 
+  $bgd{'A'} = 0.27; 
+  $bgd{'C'} = 0.23; 
+  $bgd{'G'} = 0.23; 
+  $bgd{'T'} = 0.27;  
+  my %cons1;
+  $cons1{'A'} = 0.004;
+  $cons1{'C'} = 0.0032;
+  $cons1{'G'} = 0.9896;
+  $cons1{'T'} = 0.0032;
+  my %cons2;
+  $cons2{'A'} = 0.0034; 
+  $cons2{'C'} = 0.0039; 
+  $cons2{'G'} = 0.0042; 
+  $cons2{'T'} = 0.9884;
+  my $addscore = $cons1{$seqa[3]}*$cons2{$seqa[4]}/($bgd{$seqa[3]}*$bgd{$seqa[4]}); 
+  return $addscore;
+}
+
+sub log2{
+      my ($val) = @_;
+    return log($val)/log(2);
+}
+
+sub score5{
+    my $str =$_[0];
+    $str =~ s/\cM//g;
+    $str = uc($str);
+    my $SS5score= &log2(&scoreconsensus($str)*$me2x5{$seq{&getrest($str)}});
+    return $SS5score;
+}
+###### sub score5 End
+
+###### sub score3 Start http://hollywood.mit.edu/burgelab/maxent
+our @metables3 = &makemaxentscores3;
+
+sub score3{
+    my $str =$_[0];
+    $str =~ s/\cM//g;
+    $str = uc($str);
+    my $SS3score= &log2(&scoreconsensus3($str)*&maxentscore(&getrest3($str),\@metables3));
+    return $SS3score;
+}
+
+
+sub makemaxentscores3{
+    my $dir = "splicemodels/";
+    my @list = ('me2x3acc1','me2x3acc2','me2x3acc3','me2x3acc4',
+		'me2x3acc5','me2x3acc6','me2x3acc7','me2x3acc8','me2x3acc9');
+    my @metables;
+    my $num = 0 ;
+    foreach my $file (@list) {
+	my $n = 0;
+	open (SCOREF,"<".$dir.$file) || die "Can't open $file!\n";
+	while(<SCOREF>) {
+	    chomp;
+	    $_=~ s/\s//;
+	    $metables[$num]{$n} = $_;
+	    $n++;
+	}
+	close(SCOREF);
+	#print STDERR $file."\t".$num."\t".$n."\n";
+	$num++;
+    }
+    return @metables;
+}
+
+sub getrest3{
+  my $seq = shift;
+  my $seq_noconsensus = substr($seq,0,18).substr($seq,20,3);
+  return $seq_noconsensus;
+}
+
+sub maxentscore{
+    my $seq = shift;
+    my $table_ref = shift;
+    my @metables = @$table_ref;
+    my @sc;
+    $sc[0] = $metables[0]{&hashseq(substr($seq,0,7))};
+    $sc[1] = $metables[1]{&hashseq(substr($seq,7,7))};
+    $sc[2] = $metables[2]{&hashseq(substr($seq,14,7))};
+    $sc[3] = $metables[3]{&hashseq(substr($seq,4,7))};
+    $sc[4] = $metables[4]{&hashseq(substr($seq,11,7))};
+    $sc[5] = $metables[5]{&hashseq(substr($seq,4,3))};
+    $sc[6] = $metables[6]{&hashseq(substr($seq,7,4))};
+    $sc[7] = $metables[7]{&hashseq(substr($seq,11,3))};
+    $sc[8] = $metables[8]{&hashseq(substr($seq,14,4))};
+    my $finalscore = $sc[0] * $sc[1] * $sc[2] * $sc[3] * $sc[4] / ($sc[5] * $sc[6] * $sc[7] * $sc[8]);
+    return $finalscore;
+}   
+
+sub hashseq{
+    #returns hash of sequence in base 4
+    # &hashseq('CAGAAGT') returns 4619
+    my $seq = shift;
+    $seq = uc($seq);
+    $seq =~ tr/ACGT/0123/;
+    my @seqa = split(//,$seq);
+    my $sum = 0;
+    my $len = length($seq);
+    my @four = (1,4,16,64,256,1024,4096,16384);
+    my $i=0;
+    while ($i<$len) {
+        $sum+= $seqa[$i] * $four[$len - $i -1] ;
+	$i++;
+    }
+    return $sum;
+}
+
+sub scoreconsensus3{
+  my $seq = shift;
+  my @seqa = split(//,uc($seq));
+  my %bgd; 
+  $bgd{'A'} = 0.27; 
+  $bgd{'C'} = 0.23; 
+  $bgd{'G'} = 0.23; 
+  $bgd{'T'} = 0.27;  
+  my %cons1;
+  $cons1{'A'} = 0.9903;
+  $cons1{'C'} = 0.0032;
+  $cons1{'G'} = 0.0034;
+  $cons1{'T'} = 0.0030;
+  my %cons2;
+  $cons2{'A'} = 0.0027; 
+  $cons2{'C'} = 0.0037; 
+  $cons2{'G'} = 0.9905; 
+  $cons2{'T'} = 0.0030;
+  my $addscore = $cons1{$seqa[18]} * $cons2{$seqa[19]}/ ($bgd{$seqa[18]} * $bgd{$seqa[19]}); 
+  return $addscore;
+}
+
+###### subs core3 End
+
+#### sub MFE
+sub getMFE{
+
+    my $oneseq=$_[0];
+    my $tmpseqname="tmpseq4MFE";
+    # $oneseql=length($_[0]);
+    open TEMPHP,">$tmpseqname.txt" or die ("[-] Error: Can't open or create temp file $tmpseqname.txt\n");
+    print TEMPHP ">$tmpseqname\n";
+    print TEMPHP "$oneseq\n";
+    close TEMPHP;
+
+    system("RNAfold", "--noPS", "$tmpseqname.txt", "-o$tmpseqname.MFE.txt");
+
+    unlink "$tmpseqname.txt";
+    open TEMPHPMFE, "$tmpseqname.MFE.txt" or die ("[-] Error: Can't open temp MFE file $tmpseqname.MFE.txt\n");
+    my $tmpHPMFE=1;
+		while(my $tmpMFE = <TEMPHPMFE>){
+			# say $.;
+			if ($. == 3 ){
+				$tmpHPMFE=substr($tmpMFE,-8);
+				$tmpHPMFE=substr($tmpHPMFE,0,6);
+				# say $tmpHPMFE;
+				$tmpHPMFE=$tmpHPMFE+0.0;
+				# say $tmpHPMFE;
+			}else{
+				next;
+			}
+		}
+		close TEMPHPMFE;
+		unlink "$tmpseqname.MFE.txt";
+    return $tmpHPMFE;
+}
+
+#### sub MFE end
+### sub functions End
+
+
+####################Output files###########
+
+open INPUTLIST, "< $inputlist" or die ("[-] Error: Can't open list file: $inputlist.\n");
+# open OUTTRANSIDALL, "> $opfn.outtransid.txt" or die ("[-] Error: Can't open or create $opfn.outtransid.txt\n");
+# open OUTSETRANSIDALL, "> $opfn.outSEtransid.txt" or die ("[-] Error: Can't open or create $opfn.outSEtransid.txt\n");
+# open OUTUSTRANSIDALL, "> $opfn.outUStransid.txt" or die ("[-] Error: Can't open or create $opfn.outUStransid.txt\n");
+# open OUTDSTRANSIDALL, "> $opfn.outDStransid.txt" or die ("[-] Error: Can't open or create $opfn.outDStransid.txt\n");
+# open OUTUSDSTRANSIDALL, "> $opfn.outUSDStransid.txt" or die ("[-] Error: Can't open or create $opfn.outUSDStransid.txt\n");
+# open OUTUSSEDSTRANSIDALL, "> $opfn.outUSSEDStransid.txt" or die ("[-] Error: Can't open or create $opfn.outUSSEDStransid.txt\n");
+
+open OUTSEQANA, "> $opfn.SeqAnalysis.txt" or die ("[-] Error: Can't open or create $opfn.SeqAnalysis.txt\n");
+my $simpleheader=join("\t", "AS_events", 'Group_tag', "SEID", "SEseq", "SElength", "SEGC", 
+            'USID',"USseq", 'USLen', 'USGC', 
+            'DSID','DSseq', 'DSLen', 'DSGC', 
+            'USIID', 'USILen', 'USIGC',
+            'DSIID', 'DSILen', 'DSIGC', 
+            'USI_SS5ID', 'USI_SS5seq', 'USI_SS5score', 'USI_SS3ID', 'USI_SS3seq', 'USI_SS3score',
+            'DSI_SS5ID', 'DSI_SS5seq', 'DSI_SS5score', 'DSI_SS3ID', 'DSI_SS3seq', 'DSI_SS3score',
+            'SE_H_MFEID', 'SE_H_MFEseq', 'SE_H_MFE', 'SE_T_MFEID', 'SE_T_MFEseq', 'SE_T_MFE', 
+            'US_T_MFEID', 'US_T_MFEseq', 'US_T_MFE', 'DS_H_MFEID', 'DS_H_MFEseq', 'DS_H_MFE',
+            'USI_H_MFEID', 'USI_H_MFEseq', 'USI_H_MFE', 'USI_T_MFEID', 'USI_T_MFEseq', 'USI_T_MFE',
+            'DSI_H_MFEID', 'DSI_H_MFEseq', 'DSI_H_MFE', 'DSI_T_MFEID', 'DSI_T_MFEseq', 'DSI_T_MFE');
+print OUTSEQANA "$simpleheader\n";
+
+open OUTSEQSE, "> $opfn.SA.SE.fa" or die ("[-] Error: Can't open or create $opfn.SA.SE.fa\n");
+open OUTSEQUS, "> $opfn.SA.US.fa" or die ("[-] Error: Can't open or create $opfn.SA.US.fa\n");
+open OUTSEQDS, "> $opfn.SA.DS.fa" or die ("[-] Error: Can't open or create $opfn.SA.DS.fa\n");
+open OUTSEQUSI, "> $opfn.SA.USI.fa" or die ("[-] Error: Can't open or create $opfn.SA.USI.fa\n");
+open OUTSEQDSI, "> $opfn.SA.DSI.fa" or die ("[-] Error: Can't open or create $opfn.SA.DSI.fa\n");
+open OUTSEQUSISS5, "> $opfn.SA.USI_SS5.fa" or die ("[-] Error: Can't open or create $opfn.SA.USI_SS5.fa\n");
+open OUTSEQUSISS3, "> $opfn.SA.USI_SS3.fa" or die ("[-] Error: Can't open or create $opfn.SA.USI_SS3.fa\n");
+open OUTSEQDSISS5, "> $opfn.SA.DSI_SS5.fa" or die ("[-] Error: Can't open or create $opfn.SA.DSI_SS5.fa\n");
+open OUTSEQDSISS3, "> $opfn.SA.DSI_SS3.fa" or die ("[-] Error: Can't open or create $opfn.SA.DSI_SS3.fa\n");
+
+open OUTSEQSEHMFE, "> $opfn.SA.SE_H$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.SE_H$structureLen.MFE.fa\n");
+open OUTSEQSETMFE, "> $opfn.SA.SE_T$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.SE_T$structureLen.MFE.fa\n");
+open OUTSEQUSTMFE, "> $opfn.SA.US_T$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.US_T$structureLen.MFE.fa\n");
+open OUTSEQDSHMFE, "> $opfn.SA.DS_H$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.DS_H$structureLen.MFE.fa\n");
+open OUTSEQUSIHMFE, "> $opfn.SA.USI_H$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.USI_H$structureLen.MFE.fa\n");
+open OUTSEQUSITMFE, "> $opfn.SA.USI_T$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.USI_T$structureLen.MFE.fa\n");
+open OUTSEQDSIHMFE, "> $opfn.SA.DSI_H$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.DSI_H$structureLen.MFE.fa\n");
+open OUTSEQDSITMFE, "> $opfn.SA.DSI_T$structureLen.MFE.fa" or die ("[-] Error: Can't open or create $opfn.SA.DSI_T$structureLen.MFE.fa\n");
+
+
+
+
+
+
+
+
+####################Output files End###########
+
+
+### Main ####
+
+our $starttime=time();
+print "Running. Please wait for a minute.\n";
+print "AS list: $inputlist\n";
+print "Output file prefix: $opfn\n";
+print "Group tag: $grouptag\n\n";
+
+our $count1=0;
+
+    # while(defined(our $inputline = <INPUTLISTP>)){
+while(defined(our $inputline = <INPUTLIST>)){
+    chomp $inputline;
+    if ($inputline =~ m/^\#/) {next;}
+    if ($inputline !~ m/@/g) {next;}
+    # if ($inputline > 1 and $annotcount % 1000 == 0){
+    #         print "Dealed with $annotcount annotations.\n";
+    #     }
+    #  $inputline =~ s/\r\n// ; # remove \n 2021-09-09
+        $inputline =~ s/\R//g; # remove \n 2021-09-26
+    # chomp($inputline);
+    ## Example AC149090.1_chrJH584304.1:58563:58835:-@chrJH584304.1:55111:55701:-@chrJH584304.1:59591:59667:-
+    ## Abi3bp_chr16:56594461:56594536:+@chr16:56592603:56592681:+@chr16:56642488:56642560:+
+    $count1++;
+
+    my @tmp = split (/_/,$inputline);
+
+    my $genename = $tmp[0];
+    my @tmp2 =split (/@/,$tmp[1]);
+    # my @genesymbol =split(/_/, t);
+    my @tmpSE =split (/\:/,$tmp2[0]);
+    my @tmpUS =split (/\:/,$tmp2[1]);
+    my @tmpDS =split (/\:/,$tmp2[2]);
+    # my ($SEchr, $SEstartpos, $SEendpos, $SEPM) = split (/\:/,$tmp2[0]);
+    my $SEchr = $tmpSE[0];
+    my $SEstartpos = $tmpSE[1]+1;
+    my $SEendpos = $tmpSE[2];
+    my $SEPM =$tmpSE[3];
+
+    my $USstartpos = $tmpUS[1]+1;
+    my $USendpos = $tmpUS[2];
+
+    my $DSstartpos = $tmpDS[1]+1;
+    my $DSendpos = $tmpDS[2];
+
+    my $USIstartpos = $USendpos +1;
+    my $USIendpos = $SEstartpos -1;
+
+    my $DSIstartpos = $SEendpos +1;
+    my $DSIendpos = $DSstartpos -1;
+
+    #         MaxEntScan::score5ss
+    # Each sequence must be 9 bases long. [3 bases in exon][6 bases in intron]
+
+    #         MaxEntScan::score3ss
+    # Each sequence must be 23 bases long. [20 bases in the intron][3 base in the exon]
+
+
+    if ($tmpSE[3] eq ""){next;} #pass Null line.
+    # my $SEpos="$tmpSE[0]\:$SEstartpos\[.\]\{2\}$tmpSE[2]\:\\$tmpSE[3]";   ### Pos to match keys. 
+    # my $USpos="$tmpUS[0]\:$USstartpos\\.\\.$tmpUS[2]\:\\$tmpUS[3]";
+    # my $DSpos="$tmpDS[0]\:$DSstartpos\\.\\.$tmpDS[2]\:\\$tmpDS[3]";
+    my $SEpos="$tmpSE[0]\:$SEstartpos-$tmpSE[2]\:\\$tmpSE[3]";   ### Pos to match keys. 
+    my $USpos="$tmpUS[0]\:$USstartpos-$tmpUS[2]\:\\$tmpUS[3]";
+    my $DSpos="$tmpDS[0]\:$DSstartpos-$tmpDS[2]\:\\$tmpDS[3]";
+
+    my $SEseq = getseq("$inputline.SE",$SEchr, $SEstartpos, $SEendpos, $SEPM);  #### Get SEseq. 2021.04.19 bug fix. $SEstartpos +1. remove +1
+    my $SEID = "$inputline.SE";
+
+    my $USseq = getseq("$inputline.US",$SEchr, $USstartpos, $USendpos, $SEPM);
+    my $DSseq = getseq("$inputline.DS",$SEchr, $DSstartpos, $DSendpos, $SEPM);
+
+    my $USIseq = getseq("$inputline.USI",$SEchr, $USIstartpos, $USIendpos, $SEPM);
+    my $DSIseq = getseq("$inputline.DSI",$SEchr, $DSIstartpos, $DSIendpos, $SEPM);
+
+    my ($finalUSseq, $finalDSseq, $finalUSID, $finalDSID, $finalUSIseq, $finalDSIseq, $finalUSIID, $finalDSIID, 
+        $fUSI_SS5seq, $fUSI_SS3seq, $fDSI_SS5seq, $fDSI_SS3seq,$fUSI_SS5ID, $fUSI_SS3ID, $fDSI_SS5ID, $fDSI_SS3ID,
+        $fSE_H_MFEID, $fSE_H_MFEseq, $fSE_T_MFEID, $fSE_T_MFEseq, 
+        $fUS_T_MFEID, $fUS_T_MFEseq, $fDS_H_MFEID, $fDS_H_MFEseq,
+        $fUSI_H_MFEID, $fUSI_H_MFEseq, $fUSI_T_MFEID, $fUSI_T_MFEseq,
+        $fDSI_H_MFEID, $fDSI_H_MFEseq, $fDSI_T_MFEID, $fDSI_T_MFEseq)="";
+
+        $finalUSID="$inputline.US";
+        $finalDSID="$inputline.DS";
+        $finalUSIID="$inputline.USI";
+        $finalDSIID="$inputline.DSI";
+
+        $fUSI_SS5ID="$inputline.USI_SS5";
+        $fUSI_SS3ID="$inputline.USI_SS3";
+        $fDSI_SS5ID="$inputline.DSI_SS5";
+        $fDSI_SS3ID="$inputline.DSI_SS3";
+        $fSE_H_MFEID="$inputline.SE_H$structureLen.MFE";
+        $fSE_T_MFEID="$inputline.SE_T$structureLen.MFE";
+        $fUS_T_MFEID="$inputline.US_T$structureLen.MFE";
+        $fDS_H_MFEID="$inputline.DS_H$structureLen.MFE";
+        $fUSI_H_MFEID="$inputline.USI_H$structureLen.MFE";
+        $fUSI_T_MFEID="$inputline.USI_T$structureLen.MFE";
+        $fDSI_H_MFEID="$inputline.DSI_H$structureLen.MFE";
+        $fDSI_T_MFEID="$inputline.DSI_T$structureLen.MFE";
+
+
+
+    if ($SEPM eq "+"){
+        $finalUSseq=$USseq;
+        $finalDSseq=$DSseq;
+        $finalUSIseq=$USIseq;
+        $finalDSIseq=$DSIseq;
+
+        $fUSI_SS5seq=getseq("$inputline.USI_SS5",$SEchr, $USIstartpos-3, $USIstartpos+5, $SEPM);
+        $fUSI_SS3seq=getseq("$inputline.USI_SS3",$SEchr, $USIendpos-19, $USIendpos+3, $SEPM);
+
+        $fDSI_SS5seq=getseq("$inputline.DSI_SS5",$SEchr, $DSIstartpos-3, $DSIstartpos+5, $SEPM);
+        $fDSI_SS3seq=getseq("$inputline.DSI_SS3",$SEchr, $DSIendpos-19, $DSIendpos+3, $SEPM);
+
+        
+
+    
+
+    }elsif($SEPM eq "-"){
+        $finalUSseq=$DSseq;
+        $finalDSseq=$USseq;
+        $finalUSIseq=$DSIseq;
+        $finalDSIseq=$USIseq;
+
+        $fUSI_SS5seq=getseq("$inputline.USI_SS5",$SEchr, $DSIendpos-5, $DSIendpos+3, $SEPM);
+        $fUSI_SS3seq=getseq("$inputline.USI_SS3",$SEchr, $DSIstartpos-3, $DSIstartpos+19, $SEPM);
+
+        $fDSI_SS5seq=getseq("$inputline.DSI_SS5",$SEchr, $USIendpos-5, $USIendpos+3, $SEPM);
+        $fDSI_SS3seq=getseq("$inputline.DSI_SS3",$SEchr, $USIstartpos-3, $USIstartpos+19, $SEPM);
+
+    }
+
+        $fSE_H_MFEseq = substr($SEseq,0, $structureLen);
+        $fSE_T_MFEseq = substr($SEseq,-$structureLen);
+        $fUS_T_MFEseq = substr($finalUSseq, -$structureLen);
+        $fDS_H_MFEseq = substr($finalDSseq, 0, $structureLen);
+        $fUSI_H_MFEseq = substr($finalUSIseq, 0, $structureLen);
+        $fUSI_T_MFEseq = substr($finalUSIseq, -$structureLen);
+        $fDSI_H_MFEseq = substr($finalDSIseq, 0, $structureLen);
+        $fDSI_T_MFEseq = substr($finalDSIseq, -$structureLen);
+
+    my $SElength = length($SEseq);
+    my $SEGC=getGCcontent($SEseq);
+
+    my $finalUSLen = length($finalUSseq);
+    my $finalUSGC = getGCcontent($finalUSseq);
+
+    my $finalDSLen = length($finalDSseq);
+    my $finalDSGC = getGCcontent($finalDSseq);
+
+    my $finalUSILen = length($finalUSIseq);
+    my $finalUSIGC = getGCcontent($finalUSIseq);
+
+    my $finalDSILen = length($finalDSIseq);
+    my $finalDSIGC = getGCcontent($finalDSIseq);
+
+
+
+    my $fUSI_SS5score = score5($fUSI_SS5seq); # get MaxEnt5 score
+
+    my $fDSI_SS5score = score5($fDSI_SS5seq);
+
+    my $fUSI_SS3score = score3($fUSI_SS3seq); # get MaxEnt3 score
+    my $fDSI_SS3score = score3($fDSI_SS3seq);
+
+    my $fSE_H_MFE = getMFE($fSE_H_MFEseq); # get MFE 2023.11.09
+    my $fSE_T_MFE = getMFE($fSE_T_MFEseq);
+    my $fUS_T_MFE = getMFE($fUS_T_MFEseq);
+    my $fDS_H_MFE = getMFE($fDS_H_MFEseq);
+    my $fUSI_H_MFE = getMFE($fUSI_H_MFEseq);
+    my $fUSI_T_MFE = getMFE($fUSI_T_MFEseq);
+    my $fDSI_H_MFE = getMFE($fDSI_H_MFEseq);
+    my $fDSI_T_MFE = getMFE($fDSI_T_MFEseq);
+
+
+
+    my $finaljoinout=join("\t", $inputline,$grouptag, $SEID, $SEseq, $SElength, $SEGC, 
+        $finalUSID,$finalUSseq, $finalUSLen, $finalUSGC, 
+        $finalDSID,$finalDSseq, $finalDSLen, $finalDSGC, 
+        $finalUSIID,$finalUSIseq, $finalUSILen, $finalUSIGC,
+        $finalDSIID,$finalDSIseq, $finalDSILen, $finalDSIGC,
+        $fUSI_SS5ID, $fUSI_SS5seq, $fUSI_SS5score, $fUSI_SS3ID, $fUSI_SS3seq, $fUSI_SS3score,
+        $fDSI_SS5ID, $fDSI_SS5seq, $fDSI_SS5score, $fDSI_SS3ID, $fDSI_SS3seq, $fDSI_SS3score,
+        $fSE_H_MFEID, $fSE_H_MFEseq, $fSE_H_MFE, $fSE_T_MFEID, $fSE_T_MFEseq, $fSE_T_MFE, 
+        $fUS_T_MFEID, $fUS_T_MFEseq, $fUS_T_MFE, $fDS_H_MFEID, $fDS_H_MFEseq, $fDS_H_MFE,
+        $fUSI_H_MFEID, $fUSI_H_MFEseq, $fUSI_H_MFE, $fUSI_T_MFEID, $fUSI_T_MFEseq, $fUSI_T_MFE,
+        $fDSI_H_MFEID, $fDSI_H_MFEseq, $fDSI_H_MFE, $fDSI_T_MFEID, $fDSI_T_MFEseq, $fDSI_T_MFE);
+    
+    my $finaljoinoutSimple=join("\t", $inputline, $grouptag, $SEID, $SEseq, $SElength, $SEGC, 
+        $finalUSID,$finalUSseq, $finalUSLen, $finalUSGC, 
+        $finalDSID,$finalDSseq, $finalDSLen, $finalDSGC, 
+        $finalUSIID, $finalUSILen, $finalUSIGC,
+        $finalDSIID, $finalDSILen, $finalDSIGC,
+        $fUSI_SS5ID, $fUSI_SS5seq, $fUSI_SS5score, $fUSI_SS3ID, $fUSI_SS3seq, $fUSI_SS3score,
+        $fDSI_SS5ID, $fDSI_SS5seq, $fDSI_SS5score, $fDSI_SS3ID, $fDSI_SS3seq, $fDSI_SS3score, 
+        $fSE_H_MFEID, $fSE_H_MFEseq, $fSE_H_MFE, $fSE_T_MFEID, $fSE_T_MFEseq, $fSE_T_MFE, 
+        $fUS_T_MFEID, $fUS_T_MFEseq, $fUS_T_MFE, $fDS_H_MFEID, $fDS_H_MFEseq, $fDS_H_MFE,
+        $fUSI_H_MFEID, $fUSI_H_MFEseq, $fUSI_H_MFE, $fUSI_T_MFEID, $fUSI_T_MFEseq, $fUSI_T_MFE,
+        $fDSI_H_MFEID, $fDSI_H_MFEseq, $fDSI_H_MFE, $fDSI_T_MFEID, $fDSI_T_MFEseq, $fDSI_T_MFE);
+    # print OUTSEQANA "$finaljoinout\n";
+    
+    print OUTSEQANA "$finaljoinoutSimple\n";
+
+    print OUTSEQSE ">$SEID $SElength $SEGC\n$SEseq\n";
+    print OUTSEQUS ">$finalUSID $finalUSLen $finalUSGC\n$finalUSseq\n";
+    print OUTSEQDS ">$finalDSID $finalDSLen $finalDSGC\n$finalDSseq\n";
+    print OUTSEQUSI ">$finalUSIID $finalUSILen $finalUSIGC\n$finalUSIseq\n";
+    print OUTSEQDSI ">$finalDSIID $finalDSILen $finalDSIGC\n$finalDSIseq\n";
+
+    print OUTSEQUSISS5 ">$fUSI_SS5ID $fUSI_SS5score\n$fUSI_SS5seq\n"; 
+    print OUTSEQUSISS3 ">$fUSI_SS3ID $fUSI_SS3score\n$fUSI_SS3seq\n";
+    print OUTSEQDSISS5 ">$fDSI_SS5ID $fDSI_SS5score\n$fDSI_SS5seq\n";
+    print OUTSEQDSISS3 ">$fDSI_SS3ID $fDSI_SS3score\n$fDSI_SS3seq\n";
+
+    print OUTSEQSEHMFE ">$fSE_H_MFEID $fSE_H_MFE\n$fSE_H_MFEseq\n";    
+    print OUTSEQSETMFE ">$fSE_T_MFEID $fSE_T_MFE\n$fSE_T_MFEseq\n";
+    print OUTSEQUSTMFE ">$fUS_T_MFEID $fUS_T_MFE\n$fUS_T_MFEseq\n"; 
+    print OUTSEQDSHMFE ">$fDS_H_MFEID $fDS_H_MFE\n$fDS_H_MFEseq\n";
+    print OUTSEQUSIHMFE ">$fUSI_H_MFEID $fUSI_H_MFE\n$fUSI_H_MFEseq\n"; 
+    print OUTSEQUSITMFE ">$fUSI_T_MFEID $fUSI_T_MFE\n$fUSI_T_MFEseq\n";  
+    print OUTSEQDSIHMFE ">$fDSI_H_MFEID $fDSI_H_MFE\n$fDSI_H_MFEseq\n";  
+    print OUTSEQDSITMFE ">$fDSI_T_MFEID $fDSI_T_MFE\n$fDSI_T_MFEseq\n";
+
+}
+
+close OUTSEQANA;
+close INPUTLIST;
+
+close OUTSEQSE;
+close OUTSEQUS;
+close OUTSEQDS;
+close OUTSEQUSI;
+close OUTSEQDSI;
+close OUTSEQUSISS5; 
+close OUTSEQUSISS3;
+close OUTSEQDSISS5;
+close OUTSEQDSISS3;
+
+close OUTSEQSEHMFE; 
+close OUTSEQSETMFE; 
+close OUTSEQUSTMFE; 
+close OUTSEQDSHMFE;
+close OUTSEQUSIHMFE; 
+close OUTSEQUSITMFE;  
+close OUTSEQDSIHMFE;  
+close OUTSEQDSITMFE;
+
+######################################
+# End  main
+######################################
+our $endtime=time();
+#say $starttime;
+#say $endtime;
+printf "All done! $count1 AS_events.\n%g Sec %g Min\n",$endtime-$starttime,($endtime-$starttime)/60;
+
+
