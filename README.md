@@ -1,24 +1,17 @@
 
 # EANMD
 <img src="https://github.com/dontkme/PersonalScripts/raw/master/Fig.logo.EANMD-02.png"  align="right" height="73" width="221"/>
-Exon annotation for nonsense-mediated mRNA decay (EANMD) is written by Perl to predict alternative splicing effects on potential to trigger NMD by 50-nt reules: premature stop-codon before last exon-exon junctions more than 50 nt.
+
+[![releaseVersion](https://img.shields.io/badge/release%20version-1.42-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2023--7--11-green.svg)](https://github.com/dontkme/EAHelitron/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
+
+**Exon annotation for nonsense-mediated mRNA decay** (EANMD) is written in Perl to predict alternative splicing effects on potential to trigger NMD by 50-nt reules: premature stop-codon before last exon-exon junctions more than 50 nt.
 
 
 
 
+## Workflow
 
-
-## Badges
-
-Add badges from somewhere like: [shields.io](https://shields.io/)
-
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-
-
-
-## Screenshots
-
-![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
+![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402-01.png)
 
 
 ## Features
@@ -29,14 +22,27 @@ Add badges from somewhere like: [shields.io](https://shields.io/)
 - Cross platform
 
 
+
+
 ## Installation
 
-Install my-project with npm
+you can proceed to download the EAHelitron files from https://github.com/dontkme/EAHelitron/archive/master.zip
+
+Simply unzip the downloaded zip file:
+
 
 ```bash
-  npm install my-project
-  cd my-project
+unzip EAHelitron-master.zip
 ```
+
+Navigate to the extracted folder and run EAHelitron:
+
+```
+cd EAHelitron-master
+perl EAHelitron -h
+```
+
+If the screen displays help and version information. It works.
     
 ## Running Tests
 
@@ -60,7 +66,7 @@ function App() {
 
 ## Authors
 
-- [@Kaining Hu](https://www.github.com/dontkme)
+- [@Kaining Hu](https://www.github.com/dontkme) - *Initial work* -
 
 
 ## Appendix
@@ -80,3 +86,7 @@ Any additional information goes here
 [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/)
 [![twitter](https://img.shields.io/badge/twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/)
 
+## License
+![licence](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
