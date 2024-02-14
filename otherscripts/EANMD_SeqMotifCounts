@@ -84,7 +84,7 @@ while(defined(our $seq = <>)){
 	if ($seq =~ m/^.*>/) {
 	# $seq=~ m/^.*>([a-zA-Z0-9_.-]+) ?.*/;
         $seq=~ m/^\s*>\s*(\S+)\s*(.*)/;
-        print "$1\n";
+        # print "$1\n"; 
         $Chrname[$Chri]= $1;
         $Chri++;
 	}else{
