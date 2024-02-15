@@ -137,14 +137,14 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
 
 ### 1. AS events input: 3 Columns Tab delitimated file.
 
-|Column|Explaination|Example|
-|------|------------|-------|
+|Column|Description|Example|
+|:------|:------------|:-------|
 |Gene_name|Gene Symbol|Flna|
 |AS|Alternative splicing event SEUSDS Coordinates: <br>SE@US@DS<br><br>SE\|US\|DS = chr:start0:end:strand<br>|chrX:74240815:74240872:-@chrX:74240412:74240550:-@chrX:74241102:74241303:-|
 |Optional|Custom column, will remain in output, suggest use gene_id|ENSMUSG00000031328|
 ### 2. OutCombined Output file: 38 Columns
-|Column|Explaination|
-|---|---|
+|Column|Description|
+|:---|:---|
 |QueryCol1|Input Column 1|
 |SEUSDSCoordinates|Input Column 2|
 |QueryCol3|Input Column 3|
