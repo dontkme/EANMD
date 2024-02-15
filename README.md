@@ -27,7 +27,7 @@
 
 ## Installation
 
-you can proceed to download the EANMD files from [here](https://github.com/dontkme/EANMD/archive/master.zip).
+you can proceed to download the EANMD files from [here](https://github.com/dontkme/EANMD/archive/main.zip).
 
 Simply unzip the downloaded zip file:
 
@@ -39,29 +39,54 @@ unzip EANMD-master.zip
 Navigate to the extracted folder and run EANMD:
 
 ```
-cd EANMD-master
+cd EANMD-main
 perl EANMD_GENCODE -h
 ```
 
 If the screen displays help and version information. It works.
+
+**If need Perl Parallel::ForkManager.** You could install it by command: 
+
+```bash
+cpan Parallel::ForkManager
+``` 
     
 ## Running Tests
 
 To run tests, run the following command
 
+0. Download reference genome and GTF annotation, if you don't had them before.
 ```bash
-  npm run test
+  wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.p6.genome.fa.gz
+
+  wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/gencode.vM25.primary_assembly.annotation.gtf.gz
 ```
+    
+  Unzip them
+
+
+  ```bash
+  gunzip GRCm38.p6.genome.fa.gz
+  gunzip gencode.vM25.primary_assembly.annotation.gtf.gz
+  ```
+  1. Run EANMD, test 28 mouse AS events.
+  ```bash
+  perl EANMD_GENOCDE -g gencode.vM25.primary_assembly.annotation.gtf -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
+  ```
+  If it run, test pass.
 
 
 ## Usage/Examples
 
-```javascript
-import Component from 'my-project'
+```bash
+perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input rMATs type list> <input FASTA file(s)>
 
-function App() {
-  return <Component />
-}
+    Options:
+    [-o string|Output prefix. Default: getseqsOut]
+    [-p int |Threads number. Default: 1]
+    [-d int |Distance to the last exon-exon junction. Default: 50]
+    [-s string|Specify attribute type in GTF annotation for sorting. Default: gene_id]
+    [-f string|Specify feature type in GTF annotation. Default: '']
 ```
 
 
