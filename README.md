@@ -143,6 +143,9 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
 |AS|Alternative splicing event SEUSDS Coordinates: <br>SE@US@DS<br><br>SE\|US\|DS = chr:start0:end:strand<br>|chrX:74240815:74240872:-@chrX:74240412:74240550:-@chrX:74241102:74241303:-|
 |Optional|Custom column, will remain in output, suggest use gene_id|ENSMUSG00000031328|
 ### 2. OutCombined Output file: 38 Columns
+<details>
+<summary>Columns descriptions</summary>
+
 |Column|Description|
 |:---|:---|
 |QueryCol1|Input Column 1|
@@ -183,7 +186,7 @@ SEupstreamAApos|How many AA upstream of the SE|
 UStransexonnumber|US exon number in reference transcript|
 DStransexonnumber|DS exon number in reference transcript|
 innerExonsofUSandDS|inner exon(s) between US and DS|
-
+</details>
    
    
 ## Authors
