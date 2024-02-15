@@ -6,6 +6,8 @@
 
 **Exon annotation for nonsense-mediated mRNA decay** (EANMD) is written in Perl to predict alternative splicing effects on potential to trigger NMD by 50-nt rules: premature stop-codon before last exon-exon junctions more than 50 nt.
 
+
+
 ## Features
 
 - Support Alternative splicing events: Skipped exon (**SE**), Intron Retention (**IR**), Alternative 5' splicing site (**A5SS**) and Alternative 3' splicing site (**A3SS**)
@@ -13,11 +15,12 @@
 - Support novel cassette exon, novel IR, A5SS and A3SS events NMD type prediction
 - Support customize 50-nt rule
 - Support multi-threaded
+![EANMD main feature](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.feature-02-02.png )
 
 
 ## Workflow
 
-![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402-01.png)
+![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.flow-03.png)
 
 
 
@@ -28,8 +31,8 @@
 ## Installation
 
 You can proceed to download the EANMD files from [here](https://github.com/dontkme/EANMD/archive/main.zip).
-
-Simply unzip the downloaded zip file:
+<details>
+<summary>Simply unzip the downloaded zip file:</summary>
 
 
 ```bash
@@ -50,6 +53,7 @@ If the screen displays help and version information. It works.
 ```bash
 cpan Parallel::ForkManager
 ``` 
+</details>
     
 ## Running Tests
 
@@ -102,7 +106,7 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
    ```
    perl EANMDFilterOutSE.pl -o TestMouseMM10_SE28.EANMD.f TestMouseMM10_SE28.EANMD.outCombined.txt
    ```
-   **Note**: SE events use EANMDFilterOutSE.pl; A5SS events use EANMDFilterOutA5SS.pl; A3SS and IR events use EANMDFilterOutA3SS.pl
+   **Note**: **SE** events use **EANMDFilterOutSE.pl**; **A5SS** events use **EANMDFilterOutA5SS.pl**; **A3SS** and **IR** events use **EANMDFilterOutA3SS.pl**
 
 3. Summary the unique NMD flag for each AS events. (Need R environment)
     ```
@@ -133,15 +137,16 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
 
          [-mf float|The US and DS fold change cutoff. default: 0.05]
     </details>
-    
+
     Example: 
 
     ```
     
     ```
+     **Note**: **SE** events use **GetSEinput.pl**; **A5SS** events use **GetA5SSinput.pl**; **A3SS** events use **GetA3SSinput.pl**
 
 
-1. Convert unique flag results to GTF
+2. Convert unique flag results to GTF
    ```
    perl TransFlag2GTF.pl [options] <input AS flag file>
    ```
