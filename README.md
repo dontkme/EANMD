@@ -132,28 +132,66 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
    ```
    perl TransFlag2GTF.pl [options] <input AS flag file>
    ```
+
+## File format
+
+### 1. AS events input: 3 Columns Tab delitimated file.
+
+|Column|Explaination|Example|
+|------|------------|-------|
+|Gene_name|Gene Symbol|Flna|
+|AS|Alternative splicing event SEUSDS Coordinates: <br>SE@US@DS<br><br>SE\|US\|DS = chr:start0:end:strand<br>|chrX:74240815:74240872:-@chrX:74240412:74240550:-@chrX:74241102:74241303:-|
+|Optional|Custom column, will remain in output, suggest use gene_id|ENSMUSG00000031328|
+### 2. OutCombined Output file: 38 Columns
+|Column|Explaination|
+|---|---|
+|QueryCol1|Input Column 1|
+|SEUSDSCoordinates|Input Column 2|
+|QueryCol3|Input Column 3|
+Transcript_id|Reference transcript id|
+Strand|Transcript strand|
+Exons|Total exon numbers of the reference transcript|
+Start_exon|Reference start condon exon number|
+Stop_exon|Reference stop condon exon number|
+SE_exon_Number|Skipped exon number for reference transcript|
+SE(US)_Pos|Skipped exon position for reference transcript|
+SE_length|Skipped exon length|
+Ori_CDS_length|Original CDS length|
+Ori_Star_codon_to_exon_end_seq_len|Length of start-codon to exon end|
+rm/add_SE_start_to_end_seq_len|Length of start-codon to exon end after remove or add the SE|
+SEseq|Skipped exon sequence|
+Ori_CDSexons_seq|Original Start codon to exons end sequence|
+rm/add_SE_CDSexons_seq|Sequence of start codon to exons end after remove or add the SE|
+Ori_last_junction_pos|Original last exon-exon junction position|
+Ori_last_dj|Distance of original stop codon to the last exon-exon junction (EJ)|
+Ori_NMD|Original or refernce transcript NMD type|
+Start_codon|Star_codon sequence|
+Ori_AA|Original amino acid sequence|
+rm/add_SE_AA|Amino acid sequence after remove or add the SE|
+AA_len+1|Original amino acid sequence length + 1 (stop codon)|
+Ori_AA_1st_stop_pos|Original amino acid 1st stop codon positon|
+Ori_AA_stop_pos|Original amino acid stop codon positons|
+SEed_AA_1st_stop_pos|Amino acid 1st stop codon positon after remove or add the SE|
+SEed_AA_stop_pos|Amino acid stop codon positons after remove or add the SE|
+Frame_shift_flag|Frame shift flag|
+New_1st_stop_pos_dj|Distance of the new 1st stop codon to the last EJ|
+NMD_flag|NMD flag after remove or add the SE|
+NMD_in/ex_flag|This AS event NMD type|
+source|This record form which median file|
+SEupstreamCDS|How many nt upstream of the SE|
+SEupstreamAApos|How many AA upstream of the SE|
+UStransexonnumber|US exon number in reference transcript|
+DStransexonnumber|DS exon number in reference transcript|
+innerExonsofUSandDS|inner exon(s) between US and DS|
+
+   
    
 ## Authors
 
 - [@Kaining Hu](https://www.github.com/dontkme) - *Initial work* -
 
 
-## Appendix
 
-Any additional information goes here
-
-
-## Acknowledgements
-
- - [Awesome Readme Templates](https://awesomeopensource.com/project/elangosundar/awesome-README-templates)
- - [Awesome README](https://github.com/matiassingers/awesome-readme)
- - [How to write a Good readme](https://bulldogjob.com/news/449-how-to-write-a-good-readme-for-your-github-project)
-
-
-## 🔗 Links
-[![portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://katherineoelsner.com/)
-[![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/)
-[![twitter](https://img.shields.io/badge/twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/)
 
 ## License
 ![licence](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)
