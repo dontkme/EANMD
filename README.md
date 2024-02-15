@@ -55,7 +55,9 @@ cpan Parallel::ForkManager
 
 To run tests, run the following command
 
-0. Download reference genome and GTF annotation, if you don't had them before.
+<details>
+<summary>0. Download reference genome and GTF annotation, if you don't had them before.</summary>
+
 ```bash
   wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.p6.genome.fa.gz
 
@@ -69,12 +71,15 @@ To run tests, run the following command
   gunzip GRCm38.p6.genome.fa.gz
   gunzip gencode.vM25.primary_assembly.annotation.gtf.gz
   ```
-  1. Run EANMD, test 28 mouse AS events.
+  </details>
+  <details>
+  <summary>1. Run EANMD, test 28 mouse AS events.</summary>
+
   ```bash
   perl EANMD_GENOCDE -g gencode.vM25.primary_assembly.annotation.gtf -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
   ```
   If it run, test pass.
-
+</details>
 
 ## Usage/Examples
 
@@ -109,8 +114,8 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
    perl GetSEinput.pl [options] <input rmats result>
    ```
 
-   
-   Options:
+   <details>
+   <summary>Options</summary>
 
          [-o output prefix. default: rMATS_filtered.out]
 
@@ -127,8 +132,16 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
          [-c2 int|The second sample numbers. default: 2]
 
          [-mf float|The US and DS fold change cutoff. default: 0.05]
+    </details>
+    
+    Example: 
 
-2. Convert unique flag results to GTF
+    ```
+    
+    ```
+
+
+1. Convert unique flag results to GTF
    ```
    perl TransFlag2GTF.pl [options] <input AS flag file>
    ```
@@ -144,7 +157,7 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
 |Optional|Custom column, will remain in output, suggest use gene_id|ENSMUSG00000031328|
 ### 2. OutCombined Output file: 38 Columns
 <details>
-<summary>Columns descriptions</summary>
+<summary>Descriptions of the 38 columns</summary>
 
 |Column|Description|
 |:---|:---|
