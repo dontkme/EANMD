@@ -27,7 +27,7 @@
 
 ## Installation
 
-you can proceed to download the EANMD files from [here](https://github.com/dontkme/EANMD/archive/main.zip).
+You can proceed to download the EANMD files from [here](https://github.com/dontkme/EANMD/archive/main.zip).
 
 Simply unzip the downloaded zip file:
 
@@ -78,7 +78,7 @@ To run tests, run the following command
 
 ## Usage/Examples
 
-```bash
+```
 perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input rMATs type list> <input FASTA file(s)>
 
     Options:
@@ -88,8 +88,51 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
     [-s string|Specify attribute type in GTF annotation for sorting. Default: gene_id]
     [-f string|Specify feature type in GTF annotation. Default: '']
 ```
+### Example of main EANMD steps:
+1. Run EANMD, input GTF, AS events and Genome, ouput an outCombined.txt file.
+   ```
+   perl EANMD_GENOCDE -g gencode.vM25.primary_assembly.annotation.gtf -p 4 -o TestMouseMM10_SE28.EANMD -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
+   ```
+2. Filter non-ATG transcripts and MXE results.
+   ```
+   perl EANMDFilterOutSE.pl -o TestMouseMM10_SE28.EANMD.f TestMouseMM10_SE28.EANMD.outCombined.txt
+   ```
+   **Note**: SE events use EANMDFilterOutSE.pl; A5SS events use EANMDFilterOutA5SS.pl; A3SS and IR events use EANMDFilterOutA3SS.pl
 
+3. Summary the unique NMD flag for each AS events. (Need R environment)
+    ```
+    Rscript EANMDflagcount_reverse.R -i TestMouseMM10_SE28.EANMD.f.filter.ATG.txt -o TestMouseMM10_SE28.EANMD.f.filter.ATG.txt.flag
+    ```
+### Optional Steps
+1. Get an AS-evetns list from filtering rMATS results.
+   ```
+   perl GetSEinput.pl [options] <input rmats result>
+   ```
 
+   
+   Options:
+
+         [-o output prefix. default: rMATS_filtered.out]
+
+         [-d int|min depth of average read counts. default: 20]
+
+         [-m int|min count of inclusion events' UP|Downstream junction. default: 2]
+
+         [-i float|delta PSI cutoff [0-1.0]. default: 0.15]
+
+         [-f float|FDR cutoff [0-1.0]. default: 0.05]
+
+         [-c1 int|The first sample numbers.  default: 2]
+
+         [-c2 int|The second sample numbers. default: 2]
+
+         [-mf float|The US and DS fold change cutoff. default: 0.05]
+
+2. Convert unique flag results to GTF
+   ```
+   perl TransFlag2GTF.pl [options] <input AS flag file>
+   ```
+   
 ## Authors
 
 - [@Kaining Hu](https://www.github.com/dontkme) - *Initial work* -
