@@ -88,7 +88,7 @@ To run tests, run the following command
 ## Usage/Examples
 
 ```
-perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input rMATs type list> <input FASTA file(s)>
+perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input AS-event list> <input genome FASTA file(s)>
 
     Options:
     [-o string|Output prefix. Default: getseqsOut]
@@ -121,9 +121,9 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
 
     **Note:** Could use `EANMDflagcount_reverse.R` to get reverse ordered flag.  The 'no_info', 'no_NMD', 'No_stop_codon' > 'NMD_in' or 'NMD_ex' , the final flag will be the most frequency flag.
 ### Optional Steps
-1. Get an AS-evetns list from filtering rMATS results.
+1. Get an AS-evetns list from filtering rMATS individual-counts results.
    ```
-   perl GetSEinput.pl [options] <input rmats result>
+   perl GetSEinput.pl [options] <input rmats individual-counts result>
    ```
 
    <details>
@@ -158,6 +158,8 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
     **-c1 2** and **-c2 2**: Group1 had 2 samples, Group2 had 2 samples.
     **-mf 0.05** The US and DS fold change cutoff is 0.05, means the fold of upstream exon or downstream exon to skipped exon junctions reads must greater than 1/20.
 
+    Output file: `Test.SE.EANMD.input.txt`. Could be used in `EANMD` main process.
+
      **Note**: **SE** events use **GetSEinput.pl**; **A5SS** events use **GetA5SSinput.pl**; **A3SS** events use **GetA3SSinput.pl**
 
 
@@ -166,16 +168,16 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
    perl TransFlag2GTF.pl [options] <input AS flag file>
    ```
 
-## File format
+## Main File Format
 
-### 1. AS events input: 3 Columns Tab delitimated file.
+### 1. AS events input file: 3 Columns Tab delimited file.
 
 |Column|Description|Example|
 |:------|:------------|:-------|
 |Gene_name|Gene Symbol|Flna|
 |AS|Alternative splicing event SEUSDS Coordinates: <br>SE@US@DS<br><br>SE\|US\|DS = chr:start0:end:strand<br>|chrX:74240815:74240872:-@chrX:74240412:74240550:-@chrX:74241102:74241303:-|
 |Optional|Custom column, will remain in output, suggest use gene_id|ENSMUSG00000031328|
-### 2. OutCombined Output file: 38 Columns
+### 2. OutCombined Output file: 38 Columns Tab delimited file.
 <details>
 <summary>Descriptions of the 38 columns</summary>
 
