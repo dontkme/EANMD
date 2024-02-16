@@ -2,19 +2,18 @@
 # EANMD
 <img src="https://github.com/dontkme/PersonalScripts/raw/master/Fig.logo.EANMD-02.png"  align="right" height="73" width="221"/>
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-1.42-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2023--7--11-green.svg)](https://github.com/dontkme/EAHNMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
+[![releaseVersion](https://img.shields.io/badge/release%20version-1.42-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2023--7--11-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
 
-**Exon annotation for nonsense-mediated mRNA decay** (EANMD) is written in Perl to predict alternative splicing effects on potential to trigger NMD by 50-nt rules: premature stop-codon before last exon-exon junctions more than 50 nt.
+**Exon Annotation for Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (EJ) more than 50 nt.
 
 
 
 ## Features
 
-- Support Alternative splicing events: Skipped exon (**SE**), Intron Retention (**IR**), Alternative 5' splicing site (**A5SS**) and Alternative 3' splicing site (**A3SS**)
-- Support predict original isoform NMD type, new isoform NMD type, **NMD_in** and **NMD_ex** clustering.
-- Support novel cassette exon, novel IR, A5SS and A3SS events NMD type prediction
-- Support customize 50-nt rule
-- Support multi-threaded
+- Support predicting NMD types for original and new isoforms, as well as **NMD_in** and **NMD_ex** clustering.
+- Support predicting NMD types for novel Skipped exon (**SE**), Intron Retention (**IR**), Alternative 5' splicing site (**A5SS**), and Alternative 3' splicing site (**A3SS**) events.
+- Support customizing the 50-nt rule.
+- Support multi-threading.
 ![EANMD main feature](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.feature-02-02.png )
 
 
@@ -23,14 +22,9 @@
 ![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.flow-03.png)
 
 
-
-
-
-
-
 ## Installation
 
-You can proceed to download the EANMD files from [here](https://github.com/dontkme/EANMD/archive/main.zip).
+You can download the EANMD from [here](https://github.com/dontkme/EANMD/archive/main.zip).
 <details>
 <summary>Simply unzip the downloaded zip file:</summary>
 
@@ -48,7 +42,7 @@ perl EANMD_GENCODE -h
 
 If the screen displays help and version information. It works.
 
-**If need Perl Parallel::ForkManager.** You could install it by command: 
+**If you need Perl Parallel::ForkManager.** You could install it by command: 
 
 ```bash
 cpan Parallel::ForkManager
@@ -60,7 +54,7 @@ cpan Parallel::ForkManager
 To run tests, run the following command
 
 <details>
-<summary>0. Download reference genome and GTF annotation, if you don't had them before.</summary>
+<summary>0. Download reference genome and GTF annotation, if you don't have them before.</summary>
 
 ```bash
   wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/GRCm38.p6.genome.fa.gz
@@ -68,7 +62,7 @@ To run tests, run the following command
   wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M25/gencode.vM25.primary_assembly.annotation.gtf.gz
 ```
     
-  Unzip them
+  Unzip them:
 
 
   ```bash
@@ -77,12 +71,12 @@ To run tests, run the following command
   ```
   </details>
   <details>
-  <summary>1. Run EANMD, test 28 mouse AS events.</summary>
+  <summary>1. Run EANMD, test the 28 mouse AS events.</summary>
 
   ```bash
   perl EANMD_GENOCDE -g gencode.vM25.primary_assembly.annotation.gtf -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
   ```
-  If it run, test pass.
+  If it runs, the test passes.
 </details>
 
 ## Usage/Examples
@@ -104,7 +98,7 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input A
    ```
    Main ouput file: `TestMouseMM10_SE28.EANMD.outCombined.txt`
 
-   **Note:** The default version of EANMD used the US' End and DS Start boundaries to search the reference transcripts. If you want to search the  exact coordiantes of US and DS boundaries (contain both Start and End), you could use `EANMD_GENCODE_strict` version.
+   **Note:** The default version of EANMD only used the US End and DS Start boundaries to fuzzy search the reference transcripts. If you want to search the exact coordiantes of US and DS boundaries (contain both Start and End), you could use the `EANMD_GENCODE_strict` version.
 2. Filter non-ATG-started transcripts and MXE results.
    ```
    perl EANMDFilterOutSE.pl -o TestMouseMM10_SE28.EANMD.f TestMouseMM10_SE28.EANMD.outCombined.txt
@@ -113,13 +107,14 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input A
    
    **Note:** **SE** events use **EANMDFilterOutSE.pl**; **A5SS** events use **EANMDFilterOutA5SS.pl**; **A3SS** and **IR** events use **EANMDFilterOutA3SS.pl**
 
-3. Summary the unique NMD flag for each AS events. (Need R environment)
+3. Summary the unique NMD flag for each AS events. (Requires R environment)
     ```
     Rscript EANMDflagcount.R -i TestMouseMM10_SE28.EANMD.f.filter.ATG.outCombined.txt -o TestMouseMM10_SE28.EANMD.f
     ```
     Main output file: `TestMouseMM10_SE28.EANMD.f.FinalUniqNMDflag.txt`
 
-    **Note:** Could use `EANMDflagcount_reverse.R` to get reverse ordered flag.  The 'no_info', 'no_NMD', 'No_stop_codon' > 'NMD_in' or 'NMD_ex' , the final flag will be the most frequency flag.
+    **Note:** Could use `EANMDflagcount_reverse.R` to get reverse ordered flags.  The 'no_info', 'no_NMD', 'No_stop_codon' > 'NMD_in' or 'NMD_ex', the final flag will be the most frequent flag.
+
 ### Optional Steps
 1. Get an AS-evetns list from filtering rMATS individual-counts results.
    ```
@@ -155,10 +150,10 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input A
     **-m 2**: minimus junction count for SE inclusion is 2.
     **-i 0.1**: delta PSI cutoff is 0.1.
     **-f 0.05**: max FDR is 0.05.
-    **-c1 2** and **-c2 2**: Group1 had 2 samples, Group2 had 2 samples.
-    **-mf 0.05** The US and DS fold change cutoff is 0.05, means the fold of upstream exon or downstream exon to skipped exon junctions reads must greater than 1/20.
+    **-c1 2** and **-c2 2**: Group1 has 2 samples, Group2 has 2 samples.
+    **-mf 0.05** The US and DS fold change cutoff is 0.05, meaning the fold of upstream exon or downstream exon to skipped exon junctions reads must be greater than 1:20.
 
-    Output file: `Test.SE.EANMD.input.txt`. Could be used in `EANMD` main process.
+    Output file: `Test.SE.EANMD.input.txt`. Can be used in `EANMD` main process.
 
      **Note**: **SE** events use **GetSEinput.pl**; **A5SS** events use **GetA5SSinput.pl**; **A3SS** events use **GetA3SSinput.pl**
 
@@ -215,7 +210,7 @@ Frame_shift_flag|Frame shift flag|
 New_1st_stop_pos_dj|Distance of the new 1st stop codon to the last EJ|
 NMD_flag|NMD flag after remove or add the SE|
 NMD_in/ex_flag|This AS event NMD type|
-source|This record form which median file|
+source|This record form which intermediate file|
 SEupstreamCDS|How many nt upstream of the SE|
 SEupstreamAApos|How many AA upstream of the SE|
 UStransexonnumber|US exon number in reference transcript|
@@ -224,7 +219,7 @@ innerExonsofUSandDS|inner exon(s) between US and DS|
 </details>
    
    
-## Authors
+## Author
 
 - [@Kaining Hu](https://www.github.com/dontkme) - *Initial work* -
 
