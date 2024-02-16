@@ -100,18 +100,26 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
 ### Example of main EANMD steps:
 1. Run EANMD, input GTF, AS events and Genome, ouput an outCombined.txt file.
    ```
-   perl EANMD_GENOCDE -g gencode.vM25.primary_assembly.annotation.gtf -p 4 -o TestMouseMM10_SE28.EANMD -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
+   perl EANMD_GENCODE -g gencode.vM25.primary_assembly.annotation.gtf -p 4 -o TestMouseMM10_SE28.EANMD -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
    ```
-2. Filter non-ATG transcripts and MXE results.
+   Main ouput file: `TestMouseMM10_SE28.EANMD.outCombined.txt`
+
+   **Note:** The default version of EANMD used the US' End and DS Start boundaries to search the reference transcripts. If you want to search the  exact coordiantes of US and DS boundaries (contain both Start and End), you could use `EANMD_GENCODE_strict` version.
+2. Filter non-ATG-started transcripts and MXE results.
    ```
    perl EANMDFilterOutSE.pl -o TestMouseMM10_SE28.EANMD.f TestMouseMM10_SE28.EANMD.outCombined.txt
    ```
-   **Note**: **SE** events use **EANMDFilterOutSE.pl**; **A5SS** events use **EANMDFilterOutA5SS.pl**; **A3SS** and **IR** events use **EANMDFilterOutA3SS.pl**
+   Main ouput file: `TestMouseMM10_SE28.EANMD.f.filter.ATG.outCombined.txt`
+   
+   **Note:** **SE** events use **EANMDFilterOutSE.pl**; **A5SS** events use **EANMDFilterOutA5SS.pl**; **A3SS** and **IR** events use **EANMDFilterOutA3SS.pl**
 
 3. Summary the unique NMD flag for each AS events. (Need R environment)
     ```
-    Rscript EANMDflagcount_reverse.R -i TestMouseMM10_SE28.EANMD.f.filter.ATG.txt -o TestMouseMM10_SE28.EANMD.f.filter.ATG.txt.flag
+    Rscript EANMDflagcount.R -i TestMouseMM10_SE28.EANMD.f.filter.ATG.outCombined.txt -o TestMouseMM10_SE28.EANMD.f
     ```
+    Main output file: `TestMouseMM10_SE28.EANMD.f.FinalUniqNMDflag.txt`
+
+    **Note:** Could use `EANMDflagcount_reverse.R` to get reverse ordered flag.  The 'no_info', 'no_NMD', 'No_stop_codon' > 'NMD_in' or 'NMD_ex' , the final flag will be the most frequency flag.
 ### Optional Steps
 1. Get an AS-evetns list from filtering rMATS results.
    ```
@@ -141,8 +149,15 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input r
     Example: 
 
     ```
-    
+    perl GetSEinput.pl -o Test.SE -d 2 -m 2 -i 0.1 -f 0.05 -c1 2 -c2 2 -mf 0.05 SE.MATS.JCEC.txt
     ```
+    **-d 2**: minimus depth of average read counts per sample is 2.
+    **-m 2**: minimus junction count for SE inclusion is 2.
+    **-i 0.1**: delta PSI cutoff is 0.1.
+    **-f 0.05**: max FDR is 0.05.
+    **-c1 2** and **-c2 2**: Group1 had 2 samples, Group2 had 2 samples.
+    **-mf 0.05** The US and DS fold change cutoff is 0.05, means the fold of upstream exon or downstream exon to skipped exon junctions reads must greater than 1/20.
+
      **Note**: **SE** events use **GetSEinput.pl**; **A5SS** events use **GetA5SSinput.pl**; **A3SS** events use **GetA3SSinput.pl**
 
 
