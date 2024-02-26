@@ -40,9 +40,14 @@ cd EANMD-main
 perl EANMD_GENCODE -h
 ```
 
-If the screen displays help and version information. It works.
+If the screen displays usage and version information. It works.
 
-**If you need Perl Parallel::ForkManager.** You could install it by command: 
+**If** it displays you need `Array::Utils` module, please install it by:
+```
+cpan Array::Utils
+```
+
+**If** you need Perl `Parallel::ForkManager` module. You could install it by command: 
 
 ```bash
 cpan Parallel::ForkManager
@@ -74,7 +79,7 @@ To run tests, run the following command
   <summary>1. Run EANMD, test the 28 mouse AS events.</summary>
 
   ```bash
-  perl EANMD_GENOCDE -g gencode.vM25.primary_assembly.annotation.gtf -in TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
+  perl EANMD_GENCODE -g gencode.vM25.primary_assembly.annotation.gtf -in TestDataSet/TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
   ```
   If it runs, the test passes.
 </details>
