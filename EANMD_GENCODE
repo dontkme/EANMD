@@ -1858,7 +1858,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                 # my $DSexonstartpos = $exonendPos{$tmptransid}[$DStransexonnumber];
 
                 for(my $tmpexonnumber = $UStransexonnumber; $tmpexonnumber < $DStransexonnumber; $tmpexonnumber++){
-                    my $tmpexonstartpos = $exonstartPos{$tmptransid}[$tmpexonnumber];
+                    my $tmpexonstartpos = $exonstartPos{$tmptransid}[$tmpexonnumber]; # GTF annotation don't have exon number ?
                     my $tmpexonendpos = $exonendPos{$tmptransid}[$tmpexonnumber];
                     # my $tmpbeforeexonendpos = $exonendPos{$tmptransid}[$tmpexonnumber - 1];
                     my $tmpnextExonstartpos = $exonstartPos{$tmptransid}[$tmpexonnumber+1];
