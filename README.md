@@ -4,7 +4,7 @@
 
 [![releaseVersion](https://img.shields.io/badge/release%20version-1.42-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2023--7--11-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
 
-**Exon Annotation for Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (EJ) more than 50 nt.
+**Exon Annotating for Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (EJ) more than 50 nt.
 
 
 
@@ -79,7 +79,7 @@ To run tests, run the following command
   <summary>1. Run EANMD, test the 28 mouse AS events.</summary>
 
   ```bash
-  perl EANMD_GENCODE -g gencode.vM25.primary_assembly.annotation.gtf -in TestDataSet/TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
+  perl EANMD_GENCODE -g gencode.vM25.primary_assembly.annotation.gtf -in TestDataset/TestMouseMM10_SE28.input.txt GRCm38.p6.genome.fa
   ```
   If it runs, the test passes.
 </details>
