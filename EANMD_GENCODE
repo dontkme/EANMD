@@ -1,8 +1,8 @@
 ﻿#!/usr/bin/env perl
 
 #AUTHORS
-# Kaining Hu (c) 2023
-# Get NMD transid from GTF and genome EANMD (GENCODE and loose version)v1.421 2023/07/11
+# Kaining Hu (c) 2024
+# Get NMD transid from GTF and genome EANMD (GENCODE and loose version)v1.430 2024/07/19
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation. Default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Loose coordinate version) v1.421 2023/07/11.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Loose coordinate version) v1.430 2024/07/19.\n");
 
 ###################sub TRseq##########
  
@@ -250,8 +250,8 @@ while(defined(our $inrow = <ANNOT>)){
                     $gene_id = $1;
                     }elsif($tmp3 =~ m/transcript_id \"(\S+)\"/i){
                         $transcript_id = $1;            
-                    #}elsif($tmp3 =~ m/exon_number \"(\d+)\"/i){ #GENCODE don't have "". 2021.07.02
-                    }elsif($tmp3 =~ m/exon_number (\d+)/i){ #GENCODE don't have "". 2021.07.02
+                    }elsif($tmp3 =~ m/exon_number \"?(\d+)\"?/i){ #GENCODE don't have "". 2021.07.02 # Add Ensembl GTF compatibility 2024.07.19
+                    # }elsif($tmp3 =~ m/exon_number (\d+)/i){ #GENCODE don't have "". 2021.07.02
                         $exon_number = $1 + 0;
                         # $exon_numberf3 = printf "%3.0f",$exon_number;
                         $exon_numberf3 = sprintf "%03d",$exon_number;
