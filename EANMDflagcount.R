@@ -2,9 +2,10 @@
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount.R v1.30
-##### Written by Kaining Hu 2023-02-22
+###### EANMDflagcount.R v1.40
+##### Written by Kaining Hu 2024-09-03
 library(getopt)
+library(dplyr)
 
 spec <- matrix(
 
@@ -37,33 +38,81 @@ TFNMD <- read.table(opt$Input, sep = "\t", header = T, stringsAsFactors = F)
 #TFNMD <-read.table(opt$Input,sep="\t",header = T,stringsAsFactors = F,comment.char = "")
 attach(TFNMD)
  # TFNMD$key <- paste(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,sep="_")
- TFNMD$key <- paste(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, sep = "_")
+ TFNMD$AS_events <- paste(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, sep = "_")
  # sortedTFNMD <- TFNMD[order(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
  sortedTFNMD <- TFNMD[order(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, TFNMD$NMD_in.ex_flag),]
- keytable2 <- table(sortedTFNMD$key, sortedTFNMD$NMD_in.ex_flag)
+ keytable2 <- table(sortedTFNMD$AS_events, sortedTFNMD$NMD_in.ex_flag)
+#  keytable2$Sum <- rowSums(keytable2[, 2:ncol(keytable2)])
+keytable2 <- as.data.frame.matrix(keytable2)
+keytable2$AS_events <- row.names(keytable2)
+# print(keytable2)
+keytable2 <- keytable2 %>%
+  rowwise() %>%
+  mutate(
+    SumTrans = sum(c_across(where(is.numeric)))
+  )
+
+if (!is.null(keytable2$NMD_in)) {
+
+  keytable2 <- keytable2 %>%
+  rowwise() %>%
+  mutate(
+    NMD_in_P = round(NMD_in / SumTrans, 6)
+  )
+}
+
+if (!is.null(keytable2$NMD_ex)) {
+
+  keytable2 <- keytable2 %>%
+  rowwise() %>%
+  mutate(
+    NMD_ex_P = round(NMD_ex / SumTrans, 6)
+  )
+}
+
+if (!is.null(keytable2$NMD_in) && !is.null(keytable2$NMD_ex)) {
+
+  keytable2 <- keytable2 %>%
+  rowwise() %>%
+  mutate(
+    NMD_P = round((NMD_in + NMD_ex) / SumTrans, 6)
+  )
+}
+# keytable2
+
  # head(keytable2)
  keytable2outname <- paste(opt$Output, "Key2NMDex_in_table.txt", sep = ".")
  # print(keytable2outname)
 write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
- SEUS_Pos_table2<- table(sortedTFNMD$key, sortedTFNMD$SE.US._Pos)
+
+
+sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by="AS_events")
+
+write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", col.names = NA)
+
+ SEUS_Pos_table2<- table(sortedTFNMD$AS_events, sortedTFNMD$SE.US._Pos)
  # head(SEUS_Pos_table2)
  SEUS_Pos_table2outname <- paste(opt$Output, "Key2SEUS_POS_table.txt", sep = ".")
  # print(SEUS_Pos_table2outname)
   write.table(SEUS_Pos_table2, file = SEUS_Pos_table2outname,sep = "\t", col.names=NA)
- Framekeytable2<- table(sortedTFNMD$key, sortedTFNMD$Frame_shift_flag)
+ Framekeytable2<- table(sortedTFNMD$AS_events, sortedTFNMD$Frame_shift_flag)
  # head(Framekeytable2)
  Framekeytable2outname <- paste(opt$Output, "Key2Frame_flag_table.txt", sep = ".")
  # print(Framekeytable2outname)
   write.table(Framekeytable2, file = Framekeytable2outname,sep = "\t", col.names=NA)
 # mergedfile<- merge(merge(keytable2,SEUS_Pos_table2,by="key"),Framekeytable2 ,by="key")
 # head(mergedfile)
-  keytable2 <- as.data.frame.matrix(keytable2)
+  keytable2 <- as.data.frame(keytable2)
   SEUS_Pos_table2 <- as.data.frame.matrix(SEUS_Pos_table2)
+  SEUS_Pos_table2$AS_events <- row.names(SEUS_Pos_table2)
   Framekeytable2 <- as.data.frame.matrix(Framekeytable2)
-  ma<- merge(keytable2, Framekeytable2,by = 0)
+  Framekeytable2$AS_events <- row.names(Framekeytable2)
+  # ma<- merge(keytable2, Framekeytable2,by = 0)
+  ma <- keytable2 %>% left_join(Framekeytable2, by = "AS_events")
   row.names(ma) <- ma$Row.names
   ma$Row.names <- NULL
-  mall <- merge(ma, SEUS_Pos_table2, by = 0)
+  # mall <- merge(ma, SEUS_Pos_table2, by = 0)
+  mall <- ma %>% left_join(SEUS_Pos_table2, by = "AS_events")
   mallname <- paste(opt$Output, "FinalUniqNMDflag.txt", sep = ".")
   names(mall) <- make.names(names(mall)) # make.names of safe column names
   mallnrow <- nrow(mall) # count number of rows
@@ -108,4 +157,4 @@ write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
   # library(RColorBrewer)
   # myPalette <- brewer.pal(9, "Purples") 
   
-  
+
