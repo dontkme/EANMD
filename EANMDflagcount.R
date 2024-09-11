@@ -39,6 +39,7 @@ TFNMD <- read.table(opt$Input, sep = "\t", header = T, stringsAsFactors = F)
 attach(TFNMD)
  # TFNMD$key <- paste(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,sep="_")
  TFNMD$AS_events <- paste(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, sep = "_")
+ TFNMD$AS_events_T <- paste(TFNMD$AS_events, TFNMD$Transcript_id, TFNMD$SE_exon_Number, TFNMD$source ,sep = "@")
  # sortedTFNMD <- TFNMD[order(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
  sortedTFNMD <- TFNMD[order(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, TFNMD$NMD_in.ex_flag),]
  keytable2 <- table(sortedTFNMD$AS_events, sortedTFNMD$NMD_in.ex_flag)
@@ -85,10 +86,71 @@ if (!is.null(keytable2$NMD_in) && !is.null(keytable2$NMD_ex)) {
  # print(keytable2outname)
 write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
 
-
 sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by="AS_events")
 
 write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", col.names = NA)
+
+NewExons <- sortedTFNMD %>% filter(Ori_CDSexons_seq != "") %>% select(AS_events_T, rm.add_SE_CDSexons_seq, QueryCol3)
+OriExons <- sortedTFNMD %>% filter(Ori_CDSexons_seq != "") %>% select(Transcript_id, Ori_CDSexons_seq, QueryCol3) %>% distinct(Transcript_id, .keep_all = T)
+OriExons2 <- OriExons
+colnames(OriExons2) <- colnames(NewExons)
+TX2GeneList <- rbind(
+  NewExons,
+  OriExons2
+  )
+TX2GeneList<-TX2GeneList[,c(1,3,2)]
+colnames(TX2GeneList) <- c("TXNAME", "GENEID", "SEQUENCE")
+write.table(TX2GeneList, file = paste(opt$Output, "rm.add_SE_output_sequences_OriTX2Gene.txt", sep = "."), sep = "\t", row.names = F)
+# Specify the output FASTA file path
+output_fasta <- paste(opt$Output, "rm.add_SE_output_sequences.fa", sep = ".")
+
+# Write to FASTA format
+write_fasta <- function(df, output_file) {
+  # Open the connection to the file
+  file_conn <- file(output_file, open = "w")
+  
+  # Loop over each row of the data frame and write in FASTA format
+  for (i in 1:nrow(df)) {
+    # Write the FASTA header (with a '>' character)
+    writeLines(paste0(">", df$AS_events_T[i]), con = file_conn)
+    
+    # Write the corresponding sequence
+    writeLines(df$rm.add_SE_CDSexons_seq[i], con = file_conn)
+  }
+  
+  # Close the file connection
+  close(file_conn)
+}
+
+# Call the function to write the data to the FASTA file
+write_fasta(NewExons, output_fasta)
+
+# Check the file
+cat("FASTA file saved as:", output_fasta)
+
+# Write to FASTA format
+write_Ori_fasta <- function(df, output_file) {
+  # Open the connection to the file
+  file_conn <- file(output_file, open = "w")
+  
+  # Loop over each row of the data frame and write in FASTA format
+  for (i in 1:nrow(df)) {
+    # Write the FASTA header (with a '>' character)
+    writeLines(paste0(">", df$Transcript_id[i]), con = file_conn)
+    
+    # Write the corresponding sequence
+    writeLines(df$Ori_CDSexons_seq[i], con = file_conn)
+  }
+  
+  # Close the file connection
+  close(file_conn)
+}
+output_Ori_fasta <- paste(opt$Output, "Ori_sequences.fa", sep = ".")
+# Call the function to write the data to the FASTA file
+write_Ori_fasta(OriExons, output_Ori_fasta)
+
+
+
 
  SEUS_Pos_table2<- table(sortedTFNMD$AS_events, sortedTFNMD$SE.US._Pos)
  # head(SEUS_Pos_table2)
