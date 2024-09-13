@@ -55,6 +55,8 @@ LINE: while(our $row = <>){
 
     my $gene_id=$col[1];
     my $event_id=$col[2];
+    my @sep_events=split(/[;]/, $event_id);
+    $event_id=$sep_events[1];
 
     my @coods=split(/[:]/, $event_id);
 

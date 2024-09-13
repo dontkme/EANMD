@@ -296,8 +296,8 @@ while(defined(our $inrow = <ANNOT>)){
             $key2line{$key}=$inrow;
             $key2transid{$key} = $transcript_id;
             $key2geneid{$key} = $gene_id;
-            $key2exonnumber{$key} = $exon_number;   
-            $key2exonid{$key} = $exon_id;   
+            $key2exonnumber{$key} = $exon_number;   # Important in GTF
+            $key2exonid{$key} = $exon_id;   # Important in GTF
 
             $key2length{$key} = abs($seqendpos-$seqstartpos)+1;
             $trans_PM{$transcript_id} = $plusminus;
