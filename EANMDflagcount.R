@@ -42,6 +42,9 @@ attach(TFNMD)
  TFNMD$AS_events_T <- paste(TFNMD$AS_events, TFNMD$Transcript_id, TFNMD$SE_exon_Number, TFNMD$source ,sep = "@")
  # sortedTFNMD <- TFNMD[order(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
  sortedTFNMD <- TFNMD[order(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, TFNMD$NMD_in.ex_flag),]
+
+
+
  keytable2 <- table(sortedTFNMD$AS_events, sortedTFNMD$NMD_in.ex_flag)
 #  keytable2$Sum <- rowSums(keytable2[, 2:ncol(keytable2)])
 keytable2 <- as.data.frame.matrix(keytable2)
@@ -86,9 +89,27 @@ if (!is.null(keytable2$NMD_in) && !is.null(keytable2$NMD_ex)) {
  # print(keytable2outname)
 write.table(keytable2, file = keytable2outname, sep = "\t", col.names = NA)
 
-sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by="AS_events")
+sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by = "AS_events")
+
+
+# sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Exons, 8)) %>% mutate(NMD_Score = round(SE_Pos_P * NMD_P, 8))  ### Add MMD_score transformed_value = NMD_P * (1 / (1 + exp(-k * (SE_position - 0.5))))
+# sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Exons, 8)) %>% mutate(NMD_Score = round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.5)))), 8)) #sigmoid 
+sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Stop_exon, 8)) %>% mutate(NMD_Score = ifelse(SE_Pos_P<=1, round(NMD_P * (1 / (1 + exp(-5 * (SE_Pos_P - 0.3)))), 8), round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.3)))), 8))) #sigmoid Use stop_exon
+
+Summary.sortedTFNMD <- sortedTFNMD %>%
+group_by(AS_events) %>%
+  summarise(
+    MaxNMD_Score = max(NMD_Score, na.rm = TRUE),
+    MinNMD_Score = min(NMD_Score, na.rm = TRUE),
+    MeanNMD_Score = mean(NMD_Score, na.rm = TRUE),
+    SDNMD_Score = sd(NMD_Score, na.rm = TRUE))
+
+sortedTFNMD <- sortedTFNMD %>% left_join(Summary.sortedTFNMD, , by = "AS_events")
 
 write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", col.names = NA)
+
+
+
 
 NewExons <- sortedTFNMD %>% filter(Ori_CDSexons_seq != "") %>% select(AS_events_T, rm.add_SE_CDSexons_seq, QueryCol3)
 OriExons <- sortedTFNMD %>% filter(Ori_CDSexons_seq != "") %>% select(Transcript_id, Ori_CDSexons_seq, QueryCol3) %>% distinct(Transcript_id, .keep_all = T)
@@ -98,6 +119,8 @@ TX2GeneList <- rbind(
   NewExons,
   OriExons2
   )
+
+
 TX2GeneList<-TX2GeneList[,c(1,3,2)]
 colnames(TX2GeneList) <- c("TXNAME", "GENEID", "SEQUENCE")
 write.table(TX2GeneList, file = paste(opt$Output, "rm.add_SE_output_sequences_OriTX2Gene.txt", sep = "."), sep = "\t", row.names = F)
@@ -209,6 +232,7 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
     }
   }
   
+  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary
   write.table(mall, file = mallname, sep = "\t",col.names = NA)
   print(table(mall$Finalflag))
   piedata <- as.data.frame(table(mall$Finalflag))
