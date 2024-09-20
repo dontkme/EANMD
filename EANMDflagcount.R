@@ -6,6 +6,7 @@
 ##### Written by Kaining Hu 2024-09-03
 library(getopt)
 library(dplyr)
+library(stringr)
 
 spec <- matrix(
 
@@ -40,9 +41,42 @@ attach(TFNMD)
  # TFNMD$key <- paste(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,sep="_")
  TFNMD$AS_events <- paste(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, sep = "_")
  TFNMD$AS_events_T <- paste(TFNMD$AS_events, TFNMD$Transcript_id, TFNMD$SE_exon_Number, TFNMD$source ,sep = "@")
+
+
+
+ # 转换函数
+convert_to_suppa <- function(coord) {
+  # Step 1: 按照 @ 分割
+  parts <- str_split(coord, "@")[[1]]
+  
+  # Step 2: 分别提取三部分的起始和终止坐标
+  part1 <- str_split(parts[1], ":")[[1]]
+  part2 <- str_split(parts[2], ":")[[1]]
+  part3 <- str_split(parts[3], ":")[[1]]
+  
+  # 提取染色体
+  chr <- part1[1]
+  
+  # 提取起始坐标 (part2的结束和part1的开始)
+  start_exon_end <- part2[3]
+  alt_exon_start <- part1[2]
+  alt_exon_end <- part1[3]
+  end_exon_start <- part3[2]
+  
+  # 提取链方向
+  strand <- part1[4]
+  
+  # Step 3: 组合成 SUPPA 格式
+  suppa_format <- paste0(chr, ":", start_exon_end, "-", alt_exon_start, ":", alt_exon_end, "-", end_exon_start, ":", strand)
+  
+  return(suppa_format)
+}
+
+TFNMD <- TFNMD %>%
+  mutate(AS.SUPPA = sapply(SEUSDSCoordinates, convert_to_suppa))
  # sortedTFNMD <- TFNMD[order(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
  sortedTFNMD <- TFNMD[order(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, TFNMD$NMD_in.ex_flag),]
-
+sortedTFNMD.SUPPA <- sortedTFNMD %>% select(AS_events, AS.SUPPA)
 
 
  keytable2 <- table(sortedTFNMD$AS_events, sortedTFNMD$NMD_in.ex_flag)
@@ -236,7 +270,7 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
     }
   }
   
-  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary
+  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") %>% left_join(sortedTFNMD.SUPPA, , by = "AS_events") ## 2024.09.19 Add NMD_score summary. 2024.09.20 Add AS.SUPPA
   write.table(mall, file = mallname, sep = "\t",col.names = NA)
   print(table(mall$Finalflag))
   piedata <- as.data.frame(table(mall$Finalflag))
