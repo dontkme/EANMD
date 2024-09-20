@@ -76,7 +76,9 @@ TFNMD <- TFNMD %>%
   mutate(AS.SUPPA = sapply(SEUSDSCoordinates, convert_to_suppa))
  # sortedTFNMD <- TFNMD[order(TFNMD$X.QueryCol1,TFNMD$SEUSDSCoordinates,TFNMD$NMD_in.ex_flag),]
  sortedTFNMD <- TFNMD[order(TFNMD$QueryCol1, TFNMD$SEUSDSCoordinates, TFNMD$NMD_in.ex_flag),]
-sortedTFNMD.SUPPA <- sortedTFNMD %>% select(AS_events, AS.SUPPA)
+
+sortedTFNMD.SUPPA <- sortedTFNMD %>% select(AS_events, AS.SUPPA) %>%
+  distinct(AS_events, .keep_all = TRUE)
 
 
  keytable2 <- table(sortedTFNMD$AS_events, sortedTFNMD$NMD_in.ex_flag)
@@ -270,7 +272,9 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
     }
   }
   
-  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") %>% left_join(sortedTFNMD.SUPPA, , by = "AS_events") ## 2024.09.19 Add NMD_score summary. 2024.09.20 Add AS.SUPPA
+  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary. 
+  mall <- mall %>% left_join(sortedTFNMD.SUPPA, by = "AS_events") # 2024.09.20 Add AS.SUPPA
+
   write.table(mall, file = mallname, sep = "\t",col.names = NA)
   print(table(mall$Finalflag))
   piedata <- as.data.frame(table(mall$Finalflag))
