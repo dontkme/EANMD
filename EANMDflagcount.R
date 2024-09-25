@@ -134,7 +134,8 @@ sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by = "AS_events")
 sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Number - Start_exon+1)/(Stop_exon - Start_exon+1), 8)) %>% mutate(NMD_Score = ifelse(SE_Pos_P<=1, round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.25)))), 8), round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.3)))), 8))) %>% #sigmoid Use stop_exon CDS + Exons Exon position
   # mutate(NMD_Score = ifelse(source == "USDS", NMD_Score * 1.5, NMD_Score)) %>% # Buff USDS NMD_score
   # mutate(NMD_Score = ifelse(!(SE_length  %in% c("Null", "", "NA")), ifelse(SE_length %% 3 != 0, NMD_Score * 2, NMD_Score), NMD_Score)) %>%  # Buff frame shift
-  mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 > 50, NMD_Score * 2, NMD_Score), NMD_Score)) # Buff new stop condon longer than 50. # 2024.09.19
+  mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 < 51, NMD_Score * 0.5, NMD_Score), NMD_Score)) %>% # Buff new stop condon longer than 50. # 2024.09.19
+  mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon) + 1 <= 2, NMD_Score * 0.5, NMD_Score))
 
 Summary.sortedTFNMD <- sortedTFNMD %>%
 group_by(AS_events) %>%
@@ -146,7 +147,7 @@ group_by(AS_events) %>%
 
 sortedTFNMD <- sortedTFNMD %>% left_join(Summary.sortedTFNMD, , by = "AS_events")
 
-write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", col.names = NA)
+write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", row.names = F, quote = F)
 
 
 
@@ -245,7 +246,7 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
   for (i in 1:mallnrow) {
     if (!is.null(mall$Start_codon[i]) && mall$Start_codon[i] > 0) {    ### 2021-10-20 Start codon as 1st order.
       mall$Finalflag[i] = "Start_codon"
-    }else if(!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0) {
+    }else if(!is.null((mall$NMD_ex[i]) && !is.null(mall$NMD_in[i])) && (mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0)) {
       mall$Finalflag[i] = "NMD_ex_in"
     }else if ( !is.null(mall$NMD_in[i]) && mall$NMD_in[i] > 0 && (is.null(mall$NMD_ex[i])|| mall$NMD_ex[i] == 0) ) {
       mall$Finalflag[i] = "NMD_in"
