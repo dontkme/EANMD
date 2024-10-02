@@ -132,13 +132,17 @@ sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by = "AS_events")
 # sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Exons, 8)) %>% mutate(NMD_Score = round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.5)))), 8)) #sigmoid 
 #sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Stop_exon, 8)) %>% mutate(NMD_Score = ifelse(SE_Pos_P<=1, round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.3)))), 8), round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.3)))), 8))) #sigmoid Use stop_exon
 sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Number - Start_exon+1)/(Stop_exon - Start_exon+1), 8)) %>% 
-  mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
-                            round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.25)))), 8), 
-                            round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.3)))), 8))) %>% #sigmoid Use stop_exon CDS + Exons Exon position
+  # mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
+  #                           round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
+  #                           round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% #sigmoid Use stop_exon CDS + Exons Exon position
+    mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
+                            round( (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
+                            round( (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% 
   # mutate(NMD_Score = ifelse(source == "USDS", NMD_Score * 1.5, NMD_Score)) %>% # Buff USDS NMD_score
   # mutate(NMD_Score = ifelse(!(SE_length  %in% c("Null", "", "NA")), ifelse(SE_length %% 3 != 0, NMD_Score * 2, NMD_Score), NMD_Score)) %>%  # Buff frame shift
-  mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 < 51, NMD_Score * 0.25, NMD_Score), NMD_Score)) %>% # Buff new stop condon longer than 50. # 2024.09.19
-  mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score))
+  # mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 < 51, NMD_Score * 0.25, NMD_Score), NMD_Score)) %>% # Buff new stop condon longer than 50. # 2024.09.19
+  mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score)) %>%
+  mutate(NMD_Score = ifelse((!(SEupstreamCDS  %in% c("Null", "", "-",NA)) & SEupstreamCDS <= 51), NMD_Score * 0.25, NMD_Score))
 
 Summary.sortedTFNMD <- sortedTFNMD %>%
 group_by(AS_events) %>%
