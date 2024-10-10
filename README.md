@@ -2,9 +2,9 @@
 # EANMD
 <img src="https://github.com/dontkme/PersonalScripts/raw/master/Fig.logo.EANMD-02.png"  align="right" height="73" width="221"/>
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-1.42-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2023--7--11-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
+[![releaseVersion](https://img.shields.io/badge/release%20version-1.43-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2024--7--19-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
 
-**Exon Annotating for Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (EJ) more than 50 nt.
+**Easy Annotation of Alternative Splicing Events Coupled with Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (LEJ) more than 50 nt.
 
 
 
