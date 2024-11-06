@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2024
-# Get NMD transid from GTF and genome EANMD (GENCODE and loose version)v1.430 2024/07/19
+# Get NMD transid from GTF and genome EANMD (GENCODE and loose version)v1.440 2024/11/06
 # hukaining@gmail.com
 
 use strict;
@@ -42,7 +42,7 @@ or die("[-]Error in command line arguments
     [-f string|Specify feature type in GTF annotation. Default: '']
        
 	 
-    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Loose coordinate version) v1.430 2024/07/19.\n");
+    Note: Get Transcript_id from GTF and genome, and check NMD using last junction distance. EANMD_GENCODE (Loose coordinate version) v1.440 2024/11/06.\n");
 
 ###################sub TRseq##########
  
@@ -949,7 +949,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\t5UTR";
                     print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen";
-                    for (1..27){
+                    for (1..28){ ## 2024.11.05 add $originCDSexonseqs
+                    # for (1..27){ ## 2024.11.05 add $originCDSexonseqs
                         print OUTUSSEDSTRANSID "\t";
                     }
                     print OUTUSSEDSTRANSID "\t\t";
@@ -967,7 +968,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     for (our $y = $startcodon_exonnumber + 1; $y < $setransexonid; $y++){
                         # say $y;
                         # say $exonseqs{$tmptransid}[$y];
-                            $removeSECDSseqs .= $CDSseqs{$tmptransid}[$y];
+                            $removeSECDSseqs .= $CDSseqs{$tmptransid}[$y]; # correct no need to fix ## 2024.11.06
+                            # $removeSECDSseqs .= $exonseqs{$tmptransid}[$y]; ## 2024.11.06 used CDS + exons  
                             $accCDSlength{$tmptransid}[$y] = length($removeSECDSseqs);
                     }
 
@@ -1209,7 +1211,9 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     #End loaded CDS + exons.
                     
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\tInner_exon";
-                    print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    # print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$originCDSexonseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen"; # 2024.11.06 add $originCDSexonseqs column 18 [17].
+
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos";
                     print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen"; #2021-10-18 add US DS exon numbers.
                     print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
@@ -1425,7 +1429,9 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
 
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\tStart_codon";
-                    print OUTUSSEDSTRANSID "\t$tmpSEseq\t$OriginExonsseq\t$removeSEexonsseq\t$tmpSElen\t$OriginExonsseqLen\t$removeSEexonsseqLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    # print OUTUSSEDSTRANSID "\t$tmpSEseq\t$OriginExonsseq\t$removeSEexonsseq\t$tmpSElen\t$OriginExonsseqLen\t$removeSEexonsseqLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    print OUTUSSEDSTRANSID "\t$tmpSEseq\t$OriginExonsseq\t$removeSEexonsseq\t$tmpSElen\t$OriginExonsseqLen\t$removeSEexonsseqLen\t$originCDSseqs\t$originCDSexonseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen"; # 2024.11.06 add $originCDSexonseqs column 18 [17].
+                    # print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$originCDSexonseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen"; # 2024.11.06 add $originCDSexonseqs column 16.
                     # print OUTUSSEDSTRANSID "\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\n"; #\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos\n";
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t-\t-\t-\t-";
                     # print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\n";
@@ -1583,7 +1589,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     }
 
                     print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\t3UTR";
-                    print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    # print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$originCDSexonseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen"; # 2024.11.06 add $originCDSexonseqs column 18 [17].
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos";
                     print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen";
                     print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
@@ -1754,8 +1761,9 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
 
 
-                    print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\tStop_codon";
-                    print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    print OUTUSSEDSTRANSID "$inputline\t$tmptransid\t$transPM\t$setransexonid\t$transexonnumbers\t$startcodon_exonnumber\t$stopcodon_exonnumber\tStop_codon"; # 10 column
+                    # print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen";
+                    print OUTUSSEDSTRANSID "\t$outSEseq\t$originexonseqs\t$removeSEexonseqs\t$outSEseqlen\t$originexonseqsLen\t$removeSEexonseqsLen\t$originCDSseqs\t$originCDSexonseqs\t$removeSECDSseqs\t$originCDSseqsLen\t$removeSECDSseqsLen"; # 2024.11.06 add $originCDSexonseqs column 18 [17]. [21] after 17 +1
                     print OUTUSSEDSTRANSID "\t$originCDSexonseqsLen\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originCDSseqsAA\t$removeSEexonseqsAA\t$originCDSseqsAALen\t$originCDS_1stPos\t$originCDS_allPos_allPos\t$removeSEexonseqsAA_1stPos\t$removeSEexonseqsAA_allPos";
                     print OUTUSSEDSTRANSID "\t$flag1\t$final_1st_stopcodon_exon_number\t$NewstopcodonPos\t$final_1ststopcodon_accCDSlen\t$final_1st_stopcodon_exon_number_len\t$tmpdj\t$flag3\t$tmpdjlast\t$flag4\t$flagEx_inNMD\t$removeSECDSseqs_upstreamLen\t$removeSECDSseqsAA_upstreamLen";
                     print OUTUSSEDSTRANSID "\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\n"; #2021-10-18 Add US DS exon numbers.
@@ -1934,7 +1942,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     ##### ADD SE sequence. start CDS + rest exons.
                     my %tmpaccOriginCDSlen;
                     my %tmpaccAddCDSlen;
-                    my $tmpOriginCDS="";
+                    my $tmpOriginCDS=""; #CDS + exons 2024.11.06
                     my $tmpAddCDS="";
                     my %tmpexonlen;
 
@@ -2036,7 +2044,7 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
 
                     ########### Finished of loading DNA sequences.
 
-                    my $originCDSseqsAA = seq2aa1st($tmpOriginCDS);   ### Translate 2 AA.
+                    my $originCDSseqsAA = seq2aa1st($tmpOriginCDS);   ### Translate 2 AA. 2024.11.06 tmpOriginCDS is CDS +exons
                     my $AddSEexonseqsAA = seq2aa1st($tmpAddCDS);
                     my $originFullCDSAA = seq2aa1st($originFullCDS);
 
@@ -2181,8 +2189,8 @@ for (my $pid =1; $pid<=$MAX_processes; $pid++){     ############################
                     
                     $originFullCDS =~ s/\R//g ; ### 2021-09-30 bug fix of $originFullCDS \n.
 
-                    print OUTUSDSTRANSID "$inputline\t$tmptransid\t$transPM\t$transexonnumbers\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\t$SEtransexonumber\t$startcodon_exonnumber\t$stopcodon_exonnumber";
-                    print OUTUSDSTRANSID "\t$flag1\t$addedSEseqlen\t$originFullCDSlen\t$originCDSlen\t$addSECDSlen\t$SEseq\t$originFullCDS\t$tmpOriginCDS\t$tmpAddCDS";
+                    print OUTUSDSTRANSID "$inputline\t$tmptransid\t$transPM\t$transexonnumbers\t$UStransexonnumber\t$DStransexonnumber\t$innerExonsofUSandDS\t$SEtransexonumber\t$startcodon_exonnumber\t$stopcodon_exonnumber"; # Column 1-12
+                    print OUTUSDSTRANSID "\t$flag1\t$addedSEseqlen\t$originFullCDSlen\t$originCDSlen\t$addSECDSlen\t$SEseq\t$originFullCDS\t$tmpOriginCDS\t$tmpAddCDS"; # 2024.11.06 $tmpOriginCDS is CDSexons: column 20. originCDSlen is CDSexons length. column 16
                     print OUTUSDSTRANSID "\t$originCDSexonRmLastexonseqLen\t$originCDSdj\t$flagOriginNMD\t$flagATG\t$originFullCDSAA\t$originCDSseqsAA\t$AddSEexonseqsAA\t$originFullCDSAA_1stPos\t$originFullCDSAA_allPos\t$originCDSseqsAA_1stPos\t$originCDSseqsAA_allPos\t$AddSEexonseqsAA_1stPos\t$AddSEexonseqsAA_allPos";
                     print OUTUSDSTRANSID "\t$flag2\t$addedSEDNA1stPos\t$lastJpos\t$lastdj\t$totallenofAddCDSlen\t$lastexonlen\t$flagnmd\t$flagEx_inNMD\t$AddSECDSseqs_upstreamLen\t$AddSECDSseqsAA_upstreamLen\n";
                 }
@@ -2279,10 +2287,12 @@ while (my $rmSEres=<USSEDSRES>){
     # $rmSEres =~ s/\R//g; #2021-10-18 remove \n
     my @tmprmSEres = split("\t",$rmSEres);
     print COMBINEDOUT "$tmprmSEres[0]";
-    my @rmSEcolumn =(1..4,6..8,5,9,13,18,20,19,10,16,17,21..24,25..26,27..32,39,40); 
-    for my $i (@rmSEcolumn){
+    # my @rmSEcolumn =(1..4,6..8,5,9,13,18,20,19,10,16,17,21..24,25..26,27..32,39,40); 
+    my @rmSEcolumn =(1..4,6..8,5,9,13,19,21,20,10,17,18,22..25,26..27,28..33,40,41); #2024.11.06 add $CDSexonsseq column 18 [17], replace [16] to [17]. after [17] then + 1
         # say $i;
-        if ($i== 27){
+        # if ($i== 27){ 
+    for my $i (@rmSEcolumn){
+        if ($i == 28){ #2024.11.06 add $CDSexonsseq column. after [17] + 1
 
             if ($tmprmSEres[$i] ne ""){
                 my $finaloriginstoppos = $tmprmSEres[$i] + 1; #AAlength + 1 = stop_codon pos.
@@ -2295,19 +2305,23 @@ while (my $rmSEres=<USSEDSRES>){
             print COMBINEDOUT "\t$tmprmSEres[$i]";
         }
     }
-    my $tmpNMDinexflag = $tmprmSEres[41];
+    # my $tmpNMDinexflag = $tmprmSEres[41];
+    my $tmpNMDinexflag = $tmprmSEres[42]; #2024.11.06 add $CDSexonsseq column 18 [17]. after [17] + 1
     # $tmpNMDinexflag =~ s/\n//;
     my $tmpSEupsteramCDSLen = 0;
     my $tmpSEupsteramCDSAALen = 0;
-     $tmpSEupsteramCDSLen= $tmprmSEres[42];
-     $tmpSEupsteramCDSAALen= $tmprmSEres[43];
+    #  $tmpSEupsteramCDSLen= $tmprmSEres[42];
+    #  $tmpSEupsteramCDSAALen= $tmprmSEres[43];
+     $tmpSEupsteramCDSLen= $tmprmSEres[43]; #2024.11.06 add $CDSexonsseq column 18 [17]. after [17] + 1
+     $tmpSEupsteramCDSAALen= $tmprmSEres[44]; #2024.11.06 add $CDSexonsseq column 18 [17]. after [17] + 1
     $tmpSEupsteramCDSAALen =~ s/\n//;
     unless($tmpSEupsteramCDSAALen eq ""){
         $tmpSEupsteramCDSAALen=sprintf("%.1f", $tmpSEupsteramCDSAALen);
         # say $tmpSEupsteramCDSAALen;
     }
 
-    print COMBINEDOUT "\t$tmpNMDinexflag\tUSSEDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmprmSEres[44]\t$tmprmSEres[45]\t$tmprmSEres[46]";#2021-10-18 add 44..46
+    # print COMBINEDOUT "\t$tmpNMDinexflag\tUSSEDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmprmSEres[44]\t$tmprmSEres[45]\t$tmprmSEres[46]";#2021-10-18 add 44..46
+    print COMBINEDOUT "\t$tmpNMDinexflag\tUSSEDS\t$tmpSEupsteramCDSLen\t$tmpSEupsteramCDSAALen\t$tmprmSEres[45]\t$tmprmSEres[46]\t$tmprmSEres[47]";#2021-10-18 add 44..46 #2024.11.06 add $CDSexonsseq column. after [17] + 1
 
 }
 
@@ -2315,7 +2329,8 @@ while (my $addSEres=<USDSRES>){
     # $addSEres =~ s/\R//g; #2021-10-18 remove \n
     my @tmpaddSEres = split("\t",$addSEres);
     print COMBINEDOUT "$tmpaddSEres[0]";
-    my @addSEcolumn =(1..5,10,11,9,12..18,20,21..24,25,27,29..34,37,40); #2021-10-18 add 6..8
+    # my @addSEcolumn =(1..5,10,11,9,12..18,20,21..24,25,27,29..34,37,40); #2021-10-18 add 6..8 #  
+    my @addSEcolumn =(1..5,10,11,9,12..17,19,20,21..24,25,27,29..34,37,40); #2024.11.05 fix column 20 (19), replace of 18. Perl is 0 base.
     for my $i (@addSEcolumn){
         # say $i;
         
