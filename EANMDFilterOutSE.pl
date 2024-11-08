@@ -46,7 +46,9 @@ if ($tmpline1[0] eq "QueryCol1"){
 
     print OUT "QueryCol1\tSEUSDSCoordinates\tQueryCol3\tTranscript_id\tStrand\tExons\tStart_exon\tStop_exon\tSE_exon_Number\tSE(US)_Pos\tSE_length\tOri_CDS_length\tOri_Star_codon_to_exon_end_seq_len\trm/add_SE_start_to_end_seq_len";
     print OUT "\tSEseq\tOri_CDSexons_seq\trm/add_SE_CDSexons_seq\tOri_last_junction_pos\tOri_last_dj\tOri_NMD\tStart_codon\tOri_AA\trm/add_SE_AA";
-    print OUT "\tAA_len+1\tOri_AA_1st_stop_pos\tOri_AA_stop_pos\tSEed_AA_1st_stop_pos\tSEed_AA_stop_pos\tFrame_shift_flag\tNew_1st_stop_pos_dj\tNMD_flag\tNMD_in/ex_flag\tsource\tSEupstreamCDS\tSEupstreamAApos\tUSexonNumber\tDSexonNumber\tExonNumbersBetweenUSDS\n";
+    # print OUT "\tAA_len+1\tOri_AA_1st_stop_pos\tOri_AA_stop_pos\tSEed_AA_1st_stop_pos\tSEed_AA_stop_pos\tFrame_shift_flag\tNew_1st_stop_pos_dj\tNMD_flag\tNMD_in/ex_flag\tsource\tSEupstreamCDS\tSEupstreamAApos\tUSexonNumber\tDSexonNumber\tExonNumbersBetweenUSDS\n";
+    print OUT "\tAA_len+1\tOri_AA_1st_stop_pos\tOri_AA_stop_pos\tSEed_AA_1st_stop_pos\tSEed_AA_stop_pos\tFrame_shift_flag\tNew_1st_stop_pos_dj\tNMD_flag\tNMD_in/ex_flag\tsource\tSEupstreamCDS\tSEupstreamAApos\tUStransexonnumber\tDStransexonnumber\tinnerExonsofUSandDS\n"; # 2024.11.08 use same col name
+
 }
 our $count1=0;
 our $count2=0;
