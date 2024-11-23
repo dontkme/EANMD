@@ -138,22 +138,23 @@ sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Nu
                             mutate(SE_Pos_FMid = round((SEupstreamCDS + SE_length/2)/(Ori_CDS_length), 8)) %>% ## 20241014 add SE fraction
                             mutate(SE_Pos_2LE = Exons - SE_exon_Number) %>%
                             mutate(Min_stop_pos = pmin(as.numeric(Ori_AA_1st_stop_pos), as.numeric(SEed_AA_1st_stop_pos), na.rm=TRUE)) %>%
-                            mutate(MinStop_Score = ifelse((Min_stop_pos * 3 ) <= 200, (Min_stop_pos * 3)/200 *0.5 , 1)) %>% ## 20241016 1st stop pos <200 nt efficiency
+                            # mutate(MinStop_Score = ifelse((Min_stop_pos * 3 ) <= 200, (Min_stop_pos * 3)/200 *0.5 , 1)) %>% ## 20241016 1st stop pos <200 nt efficiency # 2024.11.20 remove
                             mutate(MaxDJ = pmax(as.numeric(Ori_last_dj), as.numeric(New_1st_stop_pos_dj), na.rm=TRUE)) %>%
   # mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
   #                           round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
   #                           round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% #sigmoid Use stop_exon CDS + Exons Exon position
-    mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
-                            round( (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
-                            round( (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% 
+    # mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
+    #                         round( (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
+    #                         round( (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>%  # 2024.11.20 remove
   # mutate(NMD_Score = ifelse(source == "USDS", NMD_Score * 1.5, NMD_Score)) %>% # Buff USDS NMD_score
   # mutate(NMD_Score = ifelse(!(SE_length  %in% c("Null", "", "NA")), ifelse(SE_length %% 3 != 0, NMD_Score * 2, NMD_Score), NMD_Score)) %>%  # Buff frame shift
   # mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 < 51, NMD_Score * 0.25, NMD_Score), NMD_Score)) %>% # Buff new stop condon longer than 50. # 2024.09.19
-  mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score)) %>%
-  mutate(NMD_Score = ifelse((!(SEupstreamCDS  %in% c("Null", "", "-",NA)) & SEupstreamCDS <= 51), NMD_Score * 0.25, NMD_Score))  %>% # 2024.11.05 add UTR-3 sequence and RNA
+  # mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score)) %>%
+  # mutate(NMD_Score = ifelse((!(SEupstreamCDS  %in% c("Null", "", "-",NA)) & SEupstreamCDS <= 51), NMD_Score * 0.25, NMD_Score))  %>% # 2024.11.05 add UTR-3 sequence and RNA # 2024.11.20 remove
   mutate(SE_2Start = SE_exon_Number - Start_exon+1, 
-         Min_stop_pos_F=Min_stop_pos/Ori_Star_codon_to_exon_end_seq_len,
-         Min_stop_pos_F.MaxDJ = Min_stop_pos_F*MaxDJ,
+         Min_stop_pos_F = Min_stop_pos * 3/Ori_Star_codon_to_exon_end_seq_len, ## 2024.11.21 fix bug
+         Min_stop_pos_F.MaxDJ = Min_stop_pos_F * MaxDJ,
+         Min_stop_Pos_to_End_nt = Ori_Star_codon_to_exon_end_seq_len - Min_stop_pos * 3, # 2024.11.21 add Min_stop_Pos_to_End_nt
          # Min_stop_pos_F.MaxDJ.absMaxDJ = Min_stop_pos_F*MaxDJ*abs(MaxDJ)
          SEmod3 = SE_length %% 3,
          LE_length = Ori_Star_codon_to_exon_end_seq_len - Ori_last_junction_pos,
@@ -253,15 +254,15 @@ sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Nu
 #     New_UTR3_seq_MFE = if_else(New_UTR3_seq != "" & !is.na(New_UTR3_seq), get_mfe_batch(New_UTR3_seq), NA_real_)
 #   )# 2024.11.07 
 
-Summary.sortedTFNMD <- sortedTFNMD %>% ungroup() %>%
-group_by(AS_events) %>%
-  summarise(
-    MaxNMD_Score = max(NMD_Score, na.rm = TRUE),
-    MinNMD_Score = min(NMD_Score, na.rm = TRUE),
-    MeanNMD_Score = mean(NMD_Score, na.rm = TRUE),
-    SDNMD_Score = sd(NMD_Score, na.rm = TRUE))
+# Summary.sortedTFNMD <- sortedTFNMD %>% ungroup() %>%
+# group_by(AS_events) %>%
+#   summarise(
+#     MaxNMD_Score = max(NMD_Score, na.rm = TRUE),
+#     MinNMD_Score = min(NMD_Score, na.rm = TRUE),
+#     MeanNMD_Score = mean(NMD_Score, na.rm = TRUE),
+#     SDNMD_Score = sd(NMD_Score, na.rm = TRUE))
 
-sortedTFNMD <- sortedTFNMD %>% left_join(Summary.sortedTFNMD, , by = "AS_events")
+# sortedTFNMD <- sortedTFNMD %>% left_join(Summary.sortedTFNMD, , by = "AS_events") # 2024.11.20 remove NMD_score summary
 
 write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", row.names = F, quote = F)
 
@@ -389,7 +390,7 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
     }
   }
   
-  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary. 
+  # mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary. ## 2024.11.20 remove Summary.sortedTFNMD
   mall <- mall %>% left_join(sortedTFNMD.SUPPA, by = "AS_events") # 2024.09.20 Add AS.SUPPA
 
   write.table(mall, file = mallname, sep = "\t",col.names = NA)
@@ -453,7 +454,9 @@ start_time <- Sys.time()
         New_UTR3_seq_MFE_per_nt = if_else(New_UTR3_length > 0, New_UTR3_seq_MFE / New_UTR3_length, NA_real_)
     )
   # }
-  write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.MFE.txt", sep = "."), sep = "\t", row.names = F, quote = F)
+  MEFoutfile <- paste(opt$Output, "AS_events_NMD_P.MFE.txt", sep = ".")
+  # write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.MFE.txt", sep = "."), sep = "\t", row.names = F, quote = F)
+  write.table(sortedTFNMD, file = MEFoutfile, sep = "\t", row.names = F, quote = F)
   # Clean up temporary files
   # unlink(c(temp_input_file, temp_output_file))
   unlink(c(All_Ori_UTR3_seq.MFE, All_New_UTR3_seq.MFE, All_Ori_UTR3_seq.MFE, All_New_UTR3_seq.MFE))
@@ -462,6 +465,52 @@ start_time <- Sys.time()
 # }
 end_time <- Sys.time()
 
-
 run_time <- end_time - start_time
 cat("Runing time: ", run_time) # 2024.11.07 separate RNAfold part. 
+
+cat("Predict NMD efficiency ") # 2024.11.22 add xbt prediction
+library(xgboost)
+
+xbt.input <- read.table(file= MEFoutfile, header = T, sep = "\t")
+# or sortedTFNMD
+# xbt.input <- sortedTFNMD # Input
+bst_NMD_efficiency_0 <- xgb.load("NMD_efficiency.xgboost.model") # load model
+
+xbt.input.select<- xbt.input %>% dplyr::select(AS_events_T, Min_stop_pos_F, Min_stop_pos_F.MaxDJ, SE_length, SE_Pos_2LE, UTR3_length, MaxDJ, Start_exon, Min_stop_Pos_to_End_nt, Ori_UTR3_seq_MFE_per_nt)
+dtest <- xgb.DMatrix(data = as.matrix(xbt.input.select[, -1]))
+
+# predictions <- predict(bst_NMD_efficiency, as.matrix(xbt.input.select[, -1]))
+predictions <- predict(bst_NMD_efficiency_0, dtest)
+
+xbt.input.pred <- xbt.input
+xbt.input.pred$NMD_Score <- predictions
+xbt.input.pred <- xbt.input.pred %>% mutate(NMD_Score = ifelse(SE_Pos_FStart > 0, NMD_Score, NA))
+
+used_best_threshold <- 0.268355399370193 # Threshold
+
+xbt.input.pred <- xbt.input.pred %>% mutate(NMD_or = ifelse(NMD_P > 0, "NMD", "NonNMD"))
+xbt.input.pred <- xbt.input.pred %>% mutate(NMD_Pre = ifelse(NMD_Score > used_best_threshold, "NMD", "NonNMD"))
+
+xbtoutfile <- paste(opt$Output, "AS_events_NMD_P.MFE.xbtPred.txt", sep = ".")
+
+Summary.xbt.input.pred <- xbt.input.pred %>% ungroup() %>%
+group_by(AS_events) %>%
+  summarise(
+    MaxNMD_Score = max(NMD_Score, na.rm = TRUE),
+    MinNMD_Score = min(NMD_Score, na.rm = TRUE),
+    MeanNMD_Score = mean(NMD_Score, na.rm = TRUE),
+    SDNMD_Score = sd(NMD_Score, na.rm = TRUE),
+    MedianNMD_Score = median(NMD_Score, na.rm = TRUE))
+
+xbt.input.pred <- xbt.input.pred %>% left_join(Summary.xbt.input.pred, , by = "AS_events") # 2024.11.20 remove NMD_score summary
+write.table(xbt.input.pred, file = xbtoutfile, sep = "\t", row.names = F, quote = F)
+
+mall <- mall %>% left_join(Summary.xbt.input.pred, by = "AS_events") ## 2024.09.19 Add NMD_score summary. ## 2024.11.20 remove Summary.sortedTFNMD . 2024.11.22 Summary.xbtoutfile
+mall <- mall %>% mutate(NMD_Pre_Flag = ifelse(MedianNMD_Score > used_best_threshold, "NMD", "NonNMD"))
+  # mall <- mall %>% left_join(sortedTFNMD.SUPPA, by = "AS_events") # 2024.09.20 Add AS.SUPPA
+mallname2 <- paste(opt$Output, "FinalUniqNMDflag.NMD_score.txt", sep = ".")
+  write.table(mall, file = mallname2, sep = "\t", col.names = NA)
+
+#### 
+
+cat("All done!")
