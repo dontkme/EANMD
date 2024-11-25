@@ -151,7 +151,7 @@ sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Nu
   # mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 < 51, NMD_Score * 0.25, NMD_Score), NMD_Score)) %>% # Buff new stop condon longer than 50. # 2024.09.19
   # mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score)) %>%
   # mutate(NMD_Score = ifelse((!(SEupstreamCDS  %in% c("Null", "", "-",NA)) & SEupstreamCDS <= 51), NMD_Score * 0.25, NMD_Score))  %>% # 2024.11.05 add UTR-3 sequence and RNA # 2024.11.20 remove
-  mutate(SE_2Start = SE_exon_Number - Start_exon+1, 
+  mutate(SE_2Start = SE_exon_Number - Start_exon, # 2024.11.25 rm +1 mean intron number(s).
          Min_stop_pos_F = Min_stop_pos * 3/Ori_Star_codon_to_exon_end_seq_len, ## 2024.11.21 fix bug
          Min_stop_pos_F.MaxDJ = Min_stop_pos_F * MaxDJ,
          Min_stop_Pos_to_End_nt = Ori_Star_codon_to_exon_end_seq_len - Min_stop_pos * 3, # 2024.11.21 add Min_stop_Pos_to_End_nt
