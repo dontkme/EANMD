@@ -1,9 +1,10 @@
 #!/usr/bin/env Rscript
+
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount.R v1.50
-##### Written by Kaining Hu 2024-11-07
+###### EANMDflagcount.R v1.51
+##### Written by Kaining Hu 2025-01-09
 options(warn = -1)
 library(getopt)
 library(dplyr)
@@ -183,7 +184,23 @@ sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Nu
 
     All_Ori_UTR3_seq <- sortedTFNMD$Ori_UTR3_seq
     All_New_UTR3_seq <- sortedTFNMD$New_UTR3_seq # 2024.11.07 single files.
+    All_Ori_UTR3_seq.file.raw <- paste(opt$Output, "temp.All_Ori_UTR3_seq.raw.txt", sep = ".") 
+    All_New_UTR3_seq.file.raw <- paste(opt$Output, "temp.All_New_UTR3_seq.raw.txt", sep = ".") 
+    write.table(All_Ori_UTR3_seq, file = All_Ori_UTR3_seq.file.raw, col.names = F, row.names = F, quote = F)
+    write.table(All_New_UTR3_seq, file = All_New_UTR3_seq.file.raw, col.names = F, row.names = F, quote = F)
 
+    sortedTFNMD_LT30K <- sortedTFNMD %>%
+    mutate(
+        Ori_UTR3_seq = ifelse(nchar(Ori_UTR3_seq) > 30000, 
+                                  str_sub(Ori_UTR3_seq, -30000, -1), 
+                                  Ori_UTR3_seq),
+        New_UTR3_seq = ifelse(nchar(New_UTR3_seq) > 30000, 
+                                  str_sub(New_UTR3_seq, -30000, -1), 
+                                  New_UTR3_seq)
+    )
+
+    All_Ori_UTR3_seq <- sortedTFNMD_LT30K$Ori_UTR3_seq
+    All_New_UTR3_seq <- sortedTFNMD_LT30K$New_UTR3_seq ### 2025-01-09 add max 30K as RNAfold input.
 
     # Define a function to get MFE from RNAfold
 # get_mfe <- function(sequence) {
@@ -450,8 +467,8 @@ start_time <- Sys.time()
   sortedTFNMD <- sortedTFNMD %>% 
     rowwise() %>% 
     mutate(
-        Ori_UTR3_seq_MFE_per_nt = if_else(UTR3_length > 0, Ori_UTR3_seq_MFE / UTR3_length, NA_real_),
-        New_UTR3_seq_MFE_per_nt = if_else(New_UTR3_length > 0, New_UTR3_seq_MFE / New_UTR3_length, NA_real_)
+        Ori_UTR3_seq_MFE_per_nt = if_else(UTR3_length > 0, Ori_UTR3_seq_MFE / pmin(UTR3_length, 30000), NA_real_), # 2025-01-09, add pmin 30K
+        New_UTR3_seq_MFE_per_nt = if_else(New_UTR3_length > 0, New_UTR3_seq_MFE / pmin(New_UTR3_length, 30000), NA_real_) # 2025-01-09, add pmin 30K
     )
   # }
   MEFoutfile <- paste(opt$Output, "AS_events_NMD_P.MFE.txt", sep = ".")
