@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2022
-# Transformation NMD unique flag results into GTF v1.100 2022/03/01
+# Transformation NMD unique flag results into GTF v1.200 2025/01/13
 # hukaining@gmail.com
 
 use strict;
@@ -16,7 +16,8 @@ use Time::HiRes 'time';
 #my $pm=Parallel::ForkManager->new($MAX_processes);
 use re 'eval';
 our $opfn="TransOut";
-my $verbose;
+our $verbose;
+
 our $as_no=2;
 our $uf_no=23;
 our $feature="CDS";
@@ -29,7 +30,9 @@ our $genome="";
 our $sepchr="_chr";
 our %Chrid2seq;
 
-GetOptions("o=s" => \$opfn,"verbose"=>\$verbose,"i=i"=>\$as_no,"I=i"=>\$uf_no,"e=i"=>\$exonSL,"E=i"=>\$exonEL,"u=i"=>\$upstreml,"d=i"=>\$downstreml, "a=s"=>\$annot,"f=s"=>\$feature,"g=s"=>\$genome, "s=s"=>\$sepchr)
+Getopt::Long::Configure("no_ignore_case");
+
+GetOptions("o=s" => \$opfn,"i=i"=>\$as_no,"I=i"=>\$uf_no,"e=i"=>\$exonSL,"E=i"=>\$exonEL,"u=i"=>\$upstreml,"d=i"=>\$downstreml, "a=s"=>\$annot,"f=s"=>\$feature,"g=s"=>\$genome, "s=s"=>\$sepchr, "verbose"=>\$verbose)
 or die("[-]Error in command line arguments
   Usage: perl TransFlag2GTF.pl [options] <input AS flag file>
     options:
@@ -45,10 +48,27 @@ or die("[-]Error in command line arguments
     [-s string|Delimiter of gene name and chromosome. Default: \"_chr\"]
     [-f string|Specify feature type in GTF annotation. Default: CDS]
 	 
-    Note: Transformation NMD unique flag results into GTF v1.100 2022/03/01\n");
+    Note: Transformation NMD unique flag results into GTF v1.200 2025/01/13\n");
 
 
+# 调试输出
+# print "Options:\n";
+# print "  Output prefix: $opfn\n";
+# print "  Verbose: ", $verbose // 'off', "\n";
+# print "  AS column: $as_no\n";
+# print "  UniqueFlag column: $uf_no\n";
+# print "  Exon start length: $exonSL\n";
+# print "  Exon end length: $exonEL\n";
+# print "  Upstream length: $upstreml\n";
+# print "  Downstream length: $downstreml\n";
+# print "  Annotation filter: $annot\n";
+# print "  Feature type: $feature\n";
+# print "  Genome FASTA: $genome\n";
+# print "  Separator: $sepchr\n";
 
+# 检查选项值
+die "Error: -i (AS events column) must be > 0\n" if $as_no <= 0;
+die "Error: -I (UniqueFlag column) must be > 0\n" if $uf_no <= 0;
 ###################sub TRseq##########
 sub TRseq($)
 {
@@ -58,7 +78,9 @@ sub TRseq($)
 	return $pinseqtr;
 }
 ##################TRseq End#############
-
+print "GTF out Feature: $feature\n";
+print "AS events column Number: $as_no\nUniqFlag column Number: $uf_no\n";
+print "Delimiter of gene name and chromosome: $sepchr\n";
 
 # if ($genome && $annot){
 #     print "Input genome: $genome\nInput GTF annotation: $annot\n";
@@ -144,9 +166,9 @@ if ($genome){
 #####################################
 #Start main 
 #####################################
-print "GTF out Feature: $feature\n";
-print "AS events column Number: $as_no\nUniqFlag column Number: $uf_no\n";
-print "Delimiter of gene name and chromosome: $sepchr\n";
+# print "GTF out Feature: $feature\n";
+# print "AS events column Number: $as_no\nUniqFlag column Number: $uf_no\n";
+# print "Delimiter of gene name and chromosome: $sepchr\n";
 
 if (not $ARGV[0]) {
     die ("[-] Error: Not find a input AS_events-UniqueFlag file.\n");
