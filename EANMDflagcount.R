@@ -2,8 +2,9 @@
 # combinefile <- commandArgs(trailingOnly = TRUE)
 # # print(c("combinefile: ", combinefile))
 # print(combinefile)
-###### EANMDflagcount.R v1.40
-##### Written by Kaining Hu 2024-09-03
+###### EANMDflagcount.R v1.45
+##### Written by Kaining Hu 2024-09-20 Add AS.SUPPA
+
 library(getopt)
 library(dplyr)
 library(stringr)
@@ -132,27 +133,63 @@ sortedTFNMD <- sortedTFNMD %>% left_join(keytable2, by = "AS_events")
 # sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Exons, 8)) %>% mutate(NMD_Score = round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.5)))), 8)) #sigmoid 
 #sortedTFNMD <- sortedTFNMD %>% mutate(SE_Pos_P = round(SE_exon_Number/Stop_exon, 8)) %>% mutate(NMD_Score = ifelse(SE_Pos_P<=1, round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.3)))), 8), round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.3)))), 8))) #sigmoid Use stop_exon
 sortedTFNMD <- sortedTFNMD %>% rowwise() %>% mutate(SE_Pos_P = round((SE_exon_Number - Start_exon+1)/(Stop_exon - Start_exon+1), 8)) %>% 
+                            mutate(SE_Pos_FStart = round((SEupstreamCDS)/(Ori_CDS_length), 8)) %>%
+                            mutate(SE_Pos_FEnd = round((SEupstreamCDS + SE_length)/(Ori_CDS_length), 8)) %>%
+                            mutate(SE_Pos_FMid = round((SEupstreamCDS + SE_length/2)/(Ori_CDS_length), 8)) %>% ## 20241014 add SE fraction
+                            mutate(SE_Pos_2LE = Exons - SE_exon_Number) %>%
+                            mutate(Min_stop_pos = pmin(as.numeric(Ori_AA_1st_stop_pos), as.numeric(SEed_AA_1st_stop_pos), na.rm=TRUE)) %>%
+                            # mutate(MinStop_Score = ifelse((Min_stop_pos * 3 ) <= 200, (Min_stop_pos * 3)/200 *0.5 , 1)) %>% ## 20241016 1st stop pos <200 nt efficiency
+                            mutate(MaxDJ = pmax(as.numeric(Ori_last_dj), as.numeric(New_1st_stop_pos_dj), na.rm=TRUE)) %>%
   # mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
   #                           round(NMD_P * (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
   #                           round(NMD_P * (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% #sigmoid Use stop_exon CDS + Exons Exon position
-    mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
-                            round( (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
-                            round( (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% 
+    # mutate(NMD_Score = ifelse(SE_Pos_P<=1, 
+    #                         round( (1 / (1 + exp(-10 * (SE_Pos_P - 0.251)))), 8), 
+    #                         round( (1 / (1 + exp(5 * (SE_Pos_P - 1.249)))), 8))) %>% 
   # mutate(NMD_Score = ifelse(source == "USDS", NMD_Score * 1.5, NMD_Score)) %>% # Buff USDS NMD_score
   # mutate(NMD_Score = ifelse(!(SE_length  %in% c("Null", "", "NA")), ifelse(SE_length %% 3 != 0, NMD_Score * 2, NMD_Score), NMD_Score)) %>%  # Buff frame shift
   # mutate(NMD_Score = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-")), ifelse( as.numeric(SEed_AA_1st_stop_pos) * 3 < 51, NMD_Score * 0.25, NMD_Score), NMD_Score)) %>% # Buff new stop condon longer than 50. # 2024.09.19
-  mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score)) %>%
-  mutate(NMD_Score = ifelse((!(SEupstreamCDS  %in% c("Null", "", "-",NA)) & SEupstreamCDS <= 51), NMD_Score * 0.25, NMD_Score))
+  # mutate(NMD_Score = ifelse((SE_exon_Number - Start_exon + 1) <= 2, NMD_Score * 0.25, NMD_Score)) %>%
+  # mutate(NMD_Score = ifelse((!(SEupstreamCDS  %in% c("Null", "", "-",NA)) & SEupstreamCDS <= 51), NMD_Score * 0.25, NMD_Score))
+  mutate(SE_2Start = SE_exon_Number - Start_exon+1, 
+         Min_stop_pos_F = Min_stop_pos * 3/Ori_Star_codon_to_exon_end_seq_len, ## 2024.11.21 fix bug
+         Min_stop_pos_F.MaxDJ = Min_stop_pos_F * MaxDJ,
+         Min_stop_Pos_to_End_nt = Ori_Star_codon_to_exon_end_seq_len - Min_stop_pos * 3, # 2024.11.21 add Min_stop_Pos_to_End_nt
+         # Min_stop_pos_F.MaxDJ.absMaxDJ = Min_stop_pos_F*MaxDJ*abs(MaxDJ)
+         SEmod3 = SE_length %% 3,
+         LE_length = Ori_Star_codon_to_exon_end_seq_len - Ori_last_junction_pos,
+         UTR3_length = Ori_Star_codon_to_exon_end_seq_len - Ori_CDS_length,
+         UTR3_introns = Exons - Stop_exon,
+         UTR3_by_LE_length = UTR3_length/LE_length, # 2024.11.01 add new 3 features.
+         UTR3_F_FL = UTR3_length/Ori_Star_codon_to_exon_end_seq_len,
+         UTR3_DJ = UTR3_length - LE_length,
+         New_UTR3_length = rm.add_SE_start_to_end_seq_len - as.numeric(SEed_AA_1st_stop_pos) * 3 + 3, # 2024.11.04 # 2024.11.06 add stop-codon to 3'UTR length
+          # pmin(as.numeric(Ori_AA_1st_stop_pos), as.numeric(SEed_AA_1st_stop_pos), na.rm=TRUE))
+         ) %>%
+    mutate(Max_UTR3_length = pmax(as.numeric(UTR3_length), as.numeric(New_UTR3_length), na.rm=TRUE), 
+            Min_UTR3_length = pmin(as.numeric(UTR3_length), as.numeric(New_UTR3_length), na.rm=TRUE), 
+            Ori_UTR3_seq = str_sub(Ori_CDSexons_seq, as.numeric(Ori_CDS_length)+1, -1),
+            New_UTR3_seq = ifelse(!(SEed_AA_1st_stop_pos  %in% c("Null", "", "-",NA)), str_sub(rm.add_SE_CDSexons_seq, as.numeric(SEed_AA_1st_stop_pos) * 3 -2, -1), NA)
+            ) %>% # 2024.11.06 add stop-codon to 3'UTR length
+    mutate(Ori_UTR3_seq = ifelse(Ori_UTR3_seq == "", "0", Ori_UTR3_seq),
+           New_UTR3_seq = ifelse(New_UTR3_seq == "", "0", New_UTR3_seq)
+          ) %>% 
+    mutate(
+          Max_UTR3_seq = ifelse(!(Max_UTR3_length  %in% c( "", NA)) & (Max_UTR3_length == UTR3_length), Ori_UTR3_seq,
+          ifelse((Max_UTR3_length == New_UTR3_length), New_UTR3_seq, NA)),
+          Min_UTR3_seq = ifelse(!(Min_UTR3_length  %in% c( "", NA)) & (Min_UTR3_length == UTR3_length), Ori_UTR3_seq,
+          ifelse((Min_UTR3_length == New_UTR3_length), New_UTR3_seq, NA)) 
+    ) 
 
-Summary.sortedTFNMD <- sortedTFNMD %>%
-group_by(AS_events) %>%
-  summarise(
-    MaxNMD_Score = max(NMD_Score, na.rm = TRUE),
-    MinNMD_Score = min(NMD_Score, na.rm = TRUE),
-    MeanNMD_Score = mean(NMD_Score, na.rm = TRUE),
-    SDNMD_Score = sd(NMD_Score, na.rm = TRUE))
+# Summary.sortedTFNMD <- sortedTFNMD %>%
+# group_by(AS_events) %>%
+#   summarise(
+#     MaxNMD_Score = max(NMD_Score, na.rm = TRUE),
+#     MinNMD_Score = min(NMD_Score, na.rm = TRUE),
+#     MeanNMD_Score = mean(NMD_Score, na.rm = TRUE),
+#     SDNMD_Score = sd(NMD_Score, na.rm = TRUE))
 
-sortedTFNMD <- sortedTFNMD %>% left_join(Summary.sortedTFNMD, , by = "AS_events")
+# sortedTFNMD <- sortedTFNMD %>% left_join(Summary.sortedTFNMD, , by = "AS_events")
 
 write.table(sortedTFNMD, file = paste(opt$Output, "AS_events_NMD_P.txt", sep = "."), sep = "\t", row.names = F, quote = F)
 
@@ -280,7 +317,7 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
     }
   }
   
-  mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary. 
+  # mall <- mall %>% left_join(Summary.sortedTFNMD, by = "AS_events") ## 2024.09.19 Add NMD_score summary. 
   mall <- mall %>% left_join(sortedTFNMD.SUPPA, by = "AS_events") # 2024.09.20 Add AS.SUPPA
 
   write.table(mall, file = mallname, sep = "\t",col.names = NA)
