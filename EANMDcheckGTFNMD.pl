@@ -7,7 +7,7 @@ use Pod::Usage;
 use utf8;
 
 # 版本信息
-our $VERSION = '1.0 2025-03-05';
+our $VERSION = '1.01 2025-03-06';
 
 # 命令行选项处理
 GetOptions(
@@ -111,7 +111,15 @@ print join("\t",
 ), "\n";
 
 # 处理每个转录本
-foreach my $tid (keys %transcripts) {
+# foreach my $tid (keys %transcripts) {
+# foreach my $tid (
+#     sort {
+#         $transcripts{$a}{gene_name} cmp $transcripts{$b}{gene_name}
+#         ||
+#         $a cmp $b
+#     } keys %transcripts
+# ) {
+foreach my $tid (sort keys %transcripts) { # 2025-03-06 make results same order.
     my $t = $transcripts{$tid};
     
     # 跳过没有CDS的转录本
