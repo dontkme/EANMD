@@ -2,7 +2,7 @@
 
 #AUTHORS
 # Kaining Hu (c) 2022
-# Filter EANMD SE outCombined file v1.21 2022/01/16
+# Filter EANMD SE outCombined file v1.30 2025/03/06
 # hukaining@gmail.com
 
 use strict;
@@ -19,13 +19,14 @@ our $startcodon="ATG";
 
 #GetOptions("i=s"=>\$seqfilename,"o=s" => \$opfn,"verbose"=>\$verbose)
 #or die("Error in command line arguments\n perl Searchhelitron -o <outputfile> (inputfile)\n");
-GetOptions("o=s" => \$opfn, "s=s"=>\$startcodon, "verbose"  => \$verbose)
+GetOptions("o=s" => \$opfn, "s=s"=>\$startcodon, "annotation-error-filter" => \my $annotation_filter_on, "verbose"  => \$verbose)
 or die("[-]Error in command line arguments
   Usage: perl EANMDFilterOut.pl [options]  <input EANMD outCombined file>
     options:
     [-o string|outprefix Default: filteredOut]
     [-s string|Start_codon to remain. default: \"ATG\"]
-    Note: Filter the records in EANMD outCombined file by start codon, MXE and CDS length. v1.21 2022/01/16.\n");
+    [--annotation-error-filter| trun-on annotaion error filtering]
+    Note: Filter the records in EANMD outCombined file by start codon, MXE and CDS length. v1.30 2025/03/06.\n");
 
 
 if (not @ARGV) {
@@ -71,7 +72,7 @@ while(defined($line = <>)){
         next;
     }elsif($Pos ne "5UTR" && $source eq "USDS" && $inUSDSexonnumbers >0){
         next;
-    }elsif($Pos ne "5UTR" && $Pos ne "Start_codon" && $Pos ne "3UTR"&& $Pos ne "Stop_codon" && $oriAAlen ne '-' && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.16.
+    }elsif($annotation_filter_on && $Pos ne "5UTR" && $Pos ne "Start_codon" && $Pos ne "3UTR"&& $Pos ne "Stop_codon" && $oriAAlen ne '-' && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.16.
         
         # $oriAAlen =~ s/\"//g;
         # if( (($oriAAlen-1)*3) ne $CDSlength){

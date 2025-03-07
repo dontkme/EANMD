@@ -1,8 +1,8 @@
 #!/usr/bin/env perl
 
 #AUTHORS
-# Kaining Hu (c) 2023
-# Filter EANMD A3SS outCombined file v1.0 2023/02/07
+# Kaining Hu (c) 2025
+# Filter EANMD A3SS outCombined file v1.10 2025/03/07
 # hukaining@gmail.com
 
 use strict;
@@ -19,13 +19,14 @@ our $startcodon="ATG";
 
 #GetOptions("i=s"=>\$seqfilename,"o=s" => \$opfn,"verbose"=>\$verbose)
 #or die("Error in command line arguments\n perl Searchhelitron -o <outputfile> (inputfile)\n");
-GetOptions("o=s" => \$opfn, "s=s"=>\$startcodon, "verbose"  => \$verbose)
+GetOptions("o=s" => \$opfn, "s=s"=>\$startcodon, "annotation-error-filter" => \my $annotation_filter_on, "verbose"  => \$verbose)
 or die("[-]Error in command line arguments
   Usage: perl EANMDFilterOutA3SS.pl [options]  <input EANMD A3SS outCombined file>
     options:
     [-o string|outprefix Default: filteredOut]
     [-s string|Start_codon to remain. default: \"ATG\"]
-    Note: Filter the records in EANMD A3SS outCombined file by start codon, #IR, CDS length and Last Exon. v1.00 2023/02/07.\n");
+    [--annotation-error-filter| trun-on annotaion error filtering]
+    Note: Filter the records in EANMD A3SS outCombined file by start codon, #IR, CDS length and Last Exon. v1.10 2025/03/07.\n");
 
 
 if (not @ARGV) {
@@ -61,7 +62,7 @@ while(defined(our $line = <>)){
     #     next;
     # }elsif($Pos ne "5UTR" && $source eq "USDS" && $inUSDSexonnumbers >0){  ### IR in A3SS no need?
     #     next;
-    }elsif($Pos ne "5UTR" && $Pos ne "Start_codon" && $Pos ne "3UTR"&& $Pos ne "Stop_codon" && $oriAAlen ne '-' && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.16.
+    }elsif($annotation_filter_on && $Pos ne "5UTR" && $Pos ne "Start_codon" && $Pos ne "3UTR"&& $Pos ne "Stop_codon" && $oriAAlen ne '-' && (($oriAAlen-1)*3) ne $CDSlength){ ### Rule. remove annotation error 2022.01.16.
         next;
     }elsif($Pos ne "3UTR" && $exons eq $DSexonNo){ #### A3SS telling
         next;
