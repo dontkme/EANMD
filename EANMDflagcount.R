@@ -290,7 +290,8 @@ write_Ori_fasta(OriExons, output_Ori_fasta)
   for (i in 1:mallnrow) {
     if (!is.null(mall$Start_codon[i]) && mall$Start_codon[i] > 0) {    ### 2021-10-20 Start codon as 1st order.
       mall$Finalflag[i] = "Start_codon"
-    }else if(!is.null((mall$NMD_ex[i]) && !is.null(mall$NMD_in[i])) && (mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0)) {
+    # }else if(!is.null((mall$NMD_ex[i]) && !is.null(mall$NMD_in[i])) && (mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0)) {
+    }else if(!is.null(mall$NMD_ex[i]) && !is.null(mall$NMD_in[i]) && (mall$NMD_ex[i] > 0 && mall$NMD_in[i] > 0)) { # 2025-03-06. claude suggested
       mall$Finalflag[i] = "NMD_ex_in"
     }else if ( !is.null(mall$NMD_in[i]) && mall$NMD_in[i] > 0 && (is.null(mall$NMD_ex[i])|| mall$NMD_ex[i] == 0) ) {
       mall$Finalflag[i] = "NMD_in"
