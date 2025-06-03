@@ -4,9 +4,7 @@
 
 [![releaseVersion](https://img.shields.io/badge/release%20version-1.44-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2024--11--06-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
 
-**Easy Annotation of Alternative Splicing Events Coupled with Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (LEJ) more than 50 nt.
-
-
+**Easy Annotation of Alternative Splicing Events Coupled with Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (DJ) more than 50 nt. Xgboost is used to predict the NMD efficiency score based on Transcripts factors.
 
 ## Features
 
@@ -14,6 +12,8 @@
 - Support predicting NMD types for novel Skipped exon (**SE**), Intron Retention (**IR**), Alternative 5' splicing site (**A5SS**), and Alternative 3' splicing site (**A3SS**) events.
 - Support customizing the 50-nt rule.
 - Support multi-threading.
+- Support filtering out non-ATG-started transcripts, MXE events
+- Support sorting and scoring AS events based on our trained **Xgboost model**.
 ![EANMD main feature](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.feature-02-02.png )
 
 
@@ -36,7 +36,7 @@ You can download the EANMD from [here](https://github.com/dontkme/EANMD/archive/
 
 
 ```bash
-unzip EANMD-master.zip
+unzip EANMD-main.zip
 ```
 
 Navigate to the extracted folder and run EANMD:
