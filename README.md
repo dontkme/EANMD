@@ -2,7 +2,7 @@
 # EANMD
 <img src="https://github.com/dontkme/PersonalScripts/raw/master/Fig.logo.EANMD-02.png"  align="right" height="73" width="221"/>
 
-[![releaseVersion](https://img.shields.io/badge/release%20version-1.43-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2024--7--19-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
+[![releaseVersion](https://img.shields.io/badge/release%20version-1.44-green.svg?style=flat)](https://github.com/dontkme/EANMD/releases) [![Last-changedate](https://img.shields.io/badge/last%20change-2024--11--06-green.svg)](https://github.com/dontkme/EANMD/commit) ![perlVersion](https://img.shields.io/badge/perl-%3E%3D5.10-blue.svg?sytle=flat)
 
 **Easy Annotation of Alternative Splicing Events Coupled with Nonsense-Mediated mRNA Decay** (EANMD) is written in Perl to predict alternative splicing's potential to trigger NMD based on 50-nt rule: premature stop-codon before last exon-exon junctions (LEJ) more than 50 nt.
 
@@ -18,9 +18,15 @@
 
 
 ## Workflow
-
+### Overview
 ![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.flow-03.png)
 
+#### AS Events Detection 
+![AS Detection](https://github.com/dontkme/PersonalScripts/raw/master/1.AS_events.png)
+
+
+#### AS-NMD Events Filtering, Sorting and Scoring
+![NMD Filtering, Sorting and Scoring](https://github.com/dontkme/PersonalScripts/raw/master/3.FilterOutCombined.png)
 
 ## Installation
 
@@ -112,7 +118,7 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input A
    
    **Note:** **SE** events use **EANMDFilterOutSE.pl**; **A5SS** events use **EANMDFilterOutA5SS.pl**; **A3SS** and **IR** events use **EANMDFilterOutA3SS.pl**
 
-3. Summary the unique NMD flag for each AS events. (Requires R environment)
+3. Summary the unique **NMD Flag** for each AS events. (Requires R environment)
     ```
     Rscript EANMDflagcount.R -i TestMouseMM10_SE28.EANMD.f.filter.ATG.outCombined.txt -o TestMouseMM10_SE28.EANMD.f
     ```
@@ -120,7 +126,14 @@ perl EANMD_GENCODE [options] -g <string|GTF annotation file> -in <string|input A
 
     **Note:** Could use `EANMDflagcount_reverse.R` to get reverse ordered flags.  The 'no_info', 'no_NMD', 'No_stop_codon' > 'NMD_in' or 'NMD_ex', the final flag will be the most frequent flag.
 
-### Optional Steps
+
+4. **Optional**: If you want to get the **NMD** efficiency **score**, you could use the `EANMDflagcount_withUTRMFE.R` script. This script will calculate the NMD Score based on the 3'-UTR length, the maximum distance of stop condon to the last exon-exon junction (Max DJ), 3'-UTR MFE/nt, Minimal stop condon position fraction (Min stop Pos F) and other factors (See Paper Methods). RNAfold, xgboost R package are required for this step. Hihger the NMD Score, higher the NMD efficiency. We could filter the NMD events by the NMD Score, for example, NMD Score > 0.131.
+
+    ```
+    Rscript EANMDflagcount_withUTRMFE.R -i TestMouseMM10_SE28.EANMD.f.filter.ATG.outCombined.txt -o TestMouseMM10_SE28.EANMD.f
+    ```
+
+### Other Optional Steps
 1. Get an AS-evetns list from filtering rMATS individual-counts results.
    ```
    perl GetSEinput.pl [options] <input rmats individual-counts result>
