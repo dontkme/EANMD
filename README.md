@@ -8,25 +8,39 @@
 
 ## Features
 
+- Support long-read and short-read RNA-seq sourced AS events.
+- Support wide range species.
 - Support predicting NMD types for original and new isoforms, as well as **NMD_in** and **NMD_ex** clustering.
 - Support predicting NMD types for novel Skipped exon (**SE**), Intron Retention (**IR**), Alternative 5' splicing site (**A5SS**), and Alternative 3' splicing site (**A3SS**) events.
 - Support customizing the 50-nt rule.
 - Support multi-threading.
 - Support filtering out non-ATG-started transcripts, MXE events
-- Support sorting and scoring AS events based on our trained **Xgboost model**.
+- Support sorting and scoring AS events using our trained **Xgboost model**.
+
+
 ![EANMD main feature](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.feature-02-02.png )
 
 
-## Workflow
-### Overview
+## Workflow Overview
 ![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.flow-03.png)
 
-#### AS Events Detection 
+##### AS Detection 
+<details> 
+<summary>Click to see the AS detection steps from long-read and short-read RNA-seq</summary>
+
 ![AS Detection](https://github.com/dontkme/PersonalScripts/raw/master/1.AS_events.png)
 
+</details>
 
-#### AS-NMD Events Filtering, Sorting and Scoring
+##### Filtering, Sorting and Scoring for AS-NMD
+
+<details>
+
+<summary>Click to see the Filtering, Sorting and Scoring steps</summary>
+
 ![NMD Filtering, Sorting and Scoring](https://github.com/dontkme/PersonalScripts/raw/master/3.FilterOutCombined.png)
+
+</details>
 
 ## Installation
 
