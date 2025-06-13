@@ -11,7 +11,7 @@
 - Support **long-read** and **short-read** RNA-seq sourced AS events.
 - Support **wide range** **species**.
 - Support predicting NMD types for original and new isoforms, as well as **NMD_in** and **NMD_ex** clustering.
-- Support predicting NMD types for novel Skipped exon (**SE**), Intron Retention (**IR**), Alternative 5' splicing site (**A5SS**), and Alternative 3' splicing site (**A3SS**) events.
+- Support predicting NMD types for novel Skipped Exon (**SE**), Intron Retention (**IR**), Alternative 5' Splicing Site (**A5SS**), and Alternative 3' Splicing Site (**A3SS**) events.
 - Support **customizing the 50-nt rule**.
 - Support **multi-threading**.
 - Support filtering out non-ATG-started transcripts, MXE events
@@ -21,28 +21,37 @@
 <!-- ![EANMD main feature](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.feature-02-02.png ) -->
 
 
-## Workflow Overview
+## Workflow 
+
 ![EANMD workflow](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.flow-03.png)
 
-### 1). AS Events Detection from RNA-seq or GTF Annotation
+
+<!-- ![EANMD workflow highlight](https://github.com/dontkme/PersonalScripts/raw/master/0.workflow_highlight.png )  -->
+
+<!-- <img src="https://github.com/dontkme/PersonalScripts/raw/master/0.workflow_highlight.png" width="300"/> -->
+
+### Step 1. AS Events Detection from RNA-seq or GTF Annotation
 <details> 
-<summary>Click to see the AS detection steps from long-read and short-read RNA-seq</summary>
+<!-- <summary>Click to see the AS detection steps from long-read and short-read RNA-seq</summary> -->
+<summary>Click to see details</summary>
 
 ![AS Detection](https://github.com/dontkme/PersonalScripts/raw/master/1.AS_events.png)
 
 </details>
 
-### 2. AS-NMD Prediction
+### Step 2. AS-NMD Prediction
 
 ![EANMD main feature](https://github.com/dontkme/PersonalScripts/raw/master/Fig.workflow.202402.2.feature-02-02.png )
 
-### 3). Filtering, Sorting and Scoring AS-NMD Events
+### Step 3. Filtering, Sorting and Scoring AS-NMD Events
 
 <details>
 
-<summary>Click to see the Filtering, Sorting and Scoring steps</summary>
+<summary>Click to see details</summary>
 
-![NMD Filtering, Sorting and Scoring](https://github.com/dontkme/PersonalScripts/raw/master/3.FilterOutCombined.png)
+<!-- ![NMD Filtering, Sorting and Scoring](https://github.com/dontkme/PersonalScripts/raw/master/3.FilterOutCombined.png) -->
+
+<img src="https://github.com/dontkme/PersonalScripts/raw/master/3.FilterOutCombined.png" width="650"/>
 
 </details>
 
