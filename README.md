@@ -87,9 +87,9 @@ cpan Parallel::ForkManager
 ``` 
 </details>
     
-## Running Tests
+## Running Test
 
-To run tests, run the following command
+To run the test, run the following command in the terminal:
 
 <details>
 <summary>0. Download reference genome and GTF annotation, if you don't have them before.</summary>
@@ -108,6 +108,7 @@ To run tests, run the following command
   gunzip gencode.vM25.primary_assembly.annotation.gtf.gz
   ```
   </details>
+
   <details>
   <summary>1. Run EANMD, test the 28 mouse AS events.</summary>
 
@@ -116,6 +117,12 @@ To run tests, run the following command
   ```
   If it runs, the test passes.
 </details>
+
+---
+
+[Or test it on CodeOcean](https://codeocean.com/capsule/3402124/tree)
+
+
 
 ## Usage/Examples
 
@@ -262,7 +269,11 @@ UStransexonnumber|US exon number in reference transcript|
 DStransexonnumber|DS exon number in reference transcript|
 innerExonsofUSandDS|inner exon(s) between US and DS|
 </details>
-   
+
+## Link
+Visuliztion of EANMD results is available at:
+**EANMDnet**: [https://zlab1.shinyapps.io/EANMDnet](https://zlab1.shinyapps.io/EANMDnet) 
+
    
 ## Author
 
