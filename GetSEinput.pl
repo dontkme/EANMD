@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
 #AUTHORS
-# Kaining Hu (c) 2022
-# EANMD Filter the rMATS results and output an EANMD AS_events input list. GetSEinput.pl v1.250 2023/01/10
+# Kaining Hu (c) 2025
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. GetSEinput.pl v1.300 2025/09/11
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -32,19 +32,23 @@ our $mincount=2;
 our $compares1=2;
 our $compares2=2;
 
+our $modifycount=1;
 
 
-GetOptions("o=s" => \$opfn,"d=i"=>\$mindepth,"m=i"=>\$mincount,"i=f"=>\$DeltaPSIcutoff,"f=f"=>\$FDR,"mf=f"=>\$MXEfold,"c1=i"=>\$compares1,"c2=i"=>\$compares2,"verbose"=>\$verbose)
-	or die("[-]Error in command line arguments\n    Filter PSI v1.25 2023/01/10\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
+
+GetOptions("o=s" => \$opfn,"d=i"=>\$mindepth,"m=f"=>\$mincount,"mp=f"=>\$modifycount, "i=f"=>\$DeltaPSIcutoff,"f=f"=>\$FDR,"mf=f"=>\$MXEfold,"c1=i"=>\$compares1,"c2=i"=>\$compares2,"verbose"=>\$verbose)
+	or die("[-]Error in command line arguments\n    Filter PSI v1.30 2025/09/11\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
   options:\n
 	 [-o output prefix. default: rMATS_filtered.out]\n
 	 [-d int|min depth of average read counts. default: 20]\n
-     [-m int|min count of inclusion events' UP|Downstream junction. default: 2]\n
+     [-m float|min count of inclusion events' UP|Downstream junction. default: 2]\n
 	 [-i float|delta PSI cutoff [0-1.0]. default: 0.15]\n
 	 [-f float|FDR cutoff [0-1.0]. default: 0.05]\n
 	 [-c1 int|The first sample numbers.  default: 2]\n
 	 [-c2 int|The second sample numbers. default: 2]\n
 	 [-mf float|The US and DS fold change cutoff. default: 0.05]\n
+     [-mp float|Modify reads added before fold calculation. default: 1]\n
+
   Note: Filter the rMATS results and output an EANMD AS_events input list. \n");
 	#open IN,"chrA09.snp.vcf";
 if ($opfn eq ""){
@@ -201,9 +205,9 @@ LINE: while(our $row = <>){
     ### 5. Inclusion events' min (US|DS JC)/max(US|DS JC) greater equal to $MXEfold.
     my $tmpMXEfold=0;
     if ($tmpPSI>0){
-        $tmpMXEfold = min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]))/max(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]));
+        $tmpMXEfold = (min(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]))+$modifycount)/(max(mean(@US2SE[0..$compares1-1]),mean(@SE2DS[0..$compares1-1]))+$modifycount); # 2025-09-11 add modify reads
     }else{
-        $tmpMXEfold = min(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]))/max(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]))
+        $tmpMXEfold = (min(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]))+$modifycount)/(max(mean(@US2SE[$compares1..($compares1+$compares2-1)]),mean(@SE2DS[$compares1..($compares1+$compares2-1)]))+$modifycount) # 2025-09-11 add modify reads
     }
 
     if ($tmpMXEfold< $MXEfold){
