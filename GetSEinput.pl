@@ -157,7 +157,7 @@ LINE: while(our $row = <>){
     my @US2SE = split(/,/,$col[23]); #individual Up Stream Junction Count.
     my @SE2DS = split(/,/,$col[24]); #individual Down Stream Junction Count.
     my @SEcount = split(/,/,$col[25]); #individual SE Count.
-    my @US2DS = split(/,/,$col[25]); #individual Up Stream to Down Stream Junction Count (Skipped Junction Count).
+    my @US2DS = split(/,/,$col[26]); #individual Up Stream to Down Stream Junction Count (Skipped Junction Count). # 2026-04-13 bugfix 
 
     #### Start to filter
     ### 1. FDR cutoff $FDR.
