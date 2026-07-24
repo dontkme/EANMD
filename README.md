@@ -274,7 +274,7 @@ innerExonsofUSandDS|inner exon(s) between US and DS|
 Visualization of EANMD results is available at:
 **EANMD net**: [https://zlab1.shinyapps.io/EANMDnet](https://zlab1.shinyapps.io/EANMDnet) 
 
-Test User: Test 
+
 ![EANMD net](https://github.com/dontkme/PersonalScripts/raw/master/5.EANMDnet.png)
 
    

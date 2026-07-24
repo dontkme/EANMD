@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 
 #AUTHORS
-# Kaining Hu (c) 2025
-# EANMD Filter the rMATS results and output an EANMD AS_events input list. GetSEinput.pl v1.300 2025/09/11
+# Kaining Hu (c) 2026
+# EANMD Filter the rMATS results and output an EANMD AS_events input list. GetSEinput.pl v1.310 2026/04/13
 # hukaining@gmail.com
 #
 #use 5.0100;
@@ -37,7 +37,7 @@ our $modifycount=1;
 
 
 GetOptions("o=s" => \$opfn,"d=i"=>\$mindepth,"m=f"=>\$mincount,"mp=f"=>\$modifycount, "i=f"=>\$DeltaPSIcutoff,"f=f"=>\$FDR,"mf=f"=>\$MXEfold,"c1=i"=>\$compares1,"c2=i"=>\$compares2,"verbose"=>\$verbose)
-	or die("[-]Error in command line arguments\n    Filter PSI v1.30 2025/09/11\nUsage: perl EANMD_filterPSI.pl [options] <input rmats result>\n
+	or die("[-]Error in command line arguments\n    Filter SE PSI v1.31 2026-04-13\nUsage: perl GetSEinput.pl [options] <input rmats result>\n
   options:\n
 	 [-o output prefix. default: rMATS_filtered.out]\n
 	 [-d int|min depth of average read counts. default: 20]\n
